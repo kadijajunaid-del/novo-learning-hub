@@ -41,10 +41,10 @@ export async function GET(req: Request) {
       rows.push([t.name, t.department, t.active ? "Active" : "Disabled", evs.filter((e) => e.status === "completed").length, regs.length, attendancePct(db, evIds) ?? "—", trainerRating(db, t.id)?.toFixed(1) ?? "—"]);
     }
   } else if (type === "participation") {
-    rows = [["Employee", "Department", "Registered", "Attended", "Missed", "Certificates"]];
+    rows = [["Employee", "Department", "Registered", "Attended", "Missed"]];
     for (const u of db.users.filter((x) => x.role === "trainee")) {
       const regs = db.registrations.filter((r) => r.userId === u.id);
-      rows.push([u.name, u.department, regs.length, regs.filter((r) => r.attended === true).length, regs.filter((r) => r.attended === false).length, db.certificates.filter((c) => c.userId === u.id).length]);
+      rows.push([u.name, u.department, regs.length, regs.filter((r) => r.attended === true).length, regs.filter((r) => r.attended === false).length]);
     }
   } else if (type === "certificates") {
     rows = [["Certificate Code", "Employee", "Training", "Issued"]];

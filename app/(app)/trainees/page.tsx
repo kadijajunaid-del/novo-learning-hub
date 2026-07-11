@@ -43,7 +43,6 @@ export default async function TraineesPage() {
               <th className="px-5 py-3.5 font-semibold">Registered</th>
               <th className="px-5 py-3.5 font-semibold">Attended</th>
               <th className="px-5 py-3.5 font-semibold">Missed</th>
-              <th className="px-5 py-3.5 font-semibold">Certificates</th>
               <th className="px-5 py-3.5 font-semibold">Status</th>
               <th className="px-5 py-3.5 text-right font-semibold">Actions</th>
             </tr>
@@ -53,7 +52,6 @@ export default async function TraineesPage() {
               const regs = db.registrations.filter((r) => r.userId === t.id && (!myEventIds || myEventIds.includes(r.eventId)));
               const attended = regs.filter((r) => r.attended === true).length;
               const missed = regs.filter((r) => r.attended === false).length;
-              const certs = db.certificates.filter((c) => c.userId === t.id).length;
               return (
                 <tr key={t.id} className="border-b border-line/60 transition last:border-0 hover:bg-surface2/50">
                   <td className="px-5 py-3.5">
@@ -70,7 +68,6 @@ export default async function TraineesPage() {
                   <td className="px-5 py-3.5 font-semibold text-ink">{regs.length}</td>
                   <td className="px-5 py-3.5 text-ok">{attended}</td>
                   <td className="px-5 py-3.5 text-crit">{missed}</td>
-                  <td className="px-5 py-3.5 text-ink2">{certs}</td>
                   <td className="px-5 py-3.5">{t.active ? <Badge tone="green">Active</Badge> : <Badge tone="red">Disabled</Badge>}</td>
                   <td className="px-5 py-3.5">
                     <div className="flex items-center justify-end gap-1.5">
@@ -95,7 +92,7 @@ export default async function TraineesPage() {
               );
             })}
             {!trainees.length && (
-              <tr><td colSpan={9} className="px-5 py-8 text-center text-xs text-ink3">No trainees yet.</td></tr>
+              <tr><td colSpan={8} className="px-5 py-8 text-center text-xs text-ink3">No trainees yet.</td></tr>
             )}
           </tbody>
         </table>
