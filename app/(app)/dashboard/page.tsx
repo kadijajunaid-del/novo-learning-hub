@@ -93,7 +93,6 @@ function AdminDashboard({ db, user }: { db: DB; user: User }) {
         <StatCard href="/reports?type=attendance" label="Total registrations" value={db.registrations.length} icon={<ClipboardList size={19} />} accent="var(--s1)" />
         <StatCard href="/reports?type=feedback" label="Average rating" value={avgRating} icon={<Star size={19} />} accent="var(--s3)" sub={`${db.feedback.length} reviews`} />
         <StatCard href="/reports?type=attendance" label="Attendance" value={`${attendancePct(db) ?? 0}%`} icon={<Percent size={19} />} accent="var(--s2)" sub="Across completed sessions" />
-        <StatCard href="/certificates" label="Certificates issued" value={db.certificates.length} icon={<Award size={19} />} accent="var(--s4)" />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
