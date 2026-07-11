@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { KeyRound, Loader2, Pencil, Plus, Power, X } from "lucide-react";
 import { Avatar, Badge } from "./ui";
+import DeleteUser from "./delete-user";
 
 export type TrainerRow = {
   id: string;
@@ -134,6 +135,11 @@ export default function TrainerManager({
                     <IconBtn label={`Edit ${t.name}`} onClick={() => openEdit(t)}><Pencil size={14} /></IconBtn>
                     <IconBtn label={`Reset password for ${t.name}`} onClick={() => act(t.id, "resetPassword")} busy={busy === t.id + "resetPassword"}><KeyRound size={14} /></IconBtn>
                     <IconBtn label={t.active ? `Disable ${t.name}` : `Enable ${t.name}`} tone={t.active ? "danger" : "ok"} onClick={() => act(t.id, "toggle")} busy={busy === t.id + "toggle"}><Power size={14} /></IconBtn>
+                    <DeleteUser
+                      endpoint={`/api/trainers/${t.id}`}
+                      name={t.name}
+                      warning="This permanently removes the trainer account. Their draft events are deleted and any future sessions are cancelled (registered trainees are notified). Completed sessions stay in the reports."
+                    />
                   </div>
                 </td>
               </tr>
