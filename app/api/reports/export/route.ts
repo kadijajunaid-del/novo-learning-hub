@@ -46,13 +46,6 @@ export async function GET(req: Request) {
       const regs = db.registrations.filter((r) => r.userId === u.id);
       rows.push([u.name, u.department, regs.length, regs.filter((r) => r.attended === true).length, regs.filter((r) => r.attended === false).length]);
     }
-  } else if (type === "certificates") {
-    rows = [["Certificate Code", "Employee", "Training", "Issued"]];
-    for (const c of db.certificates) {
-      const u = db.users.find((x) => x.id === c.userId);
-      const e = db.events.find((x) => x.id === c.eventId);
-      rows.push([c.code, u?.name ?? "", e?.title ?? "", c.issuedAt.slice(0, 10)]);
-    }
   } else if (type === "feedback") {
     rows = [["Training", "Employee", "Rating", "Comment", "Date"]];
     for (const f of db.feedback) {

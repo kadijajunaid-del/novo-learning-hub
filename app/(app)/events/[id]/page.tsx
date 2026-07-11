@@ -196,7 +196,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
               )}
               {canManage && attendanceRows.length > 0 && (
                 <p className="mt-3 border-t border-line pt-3 text-[11px] leading-relaxed text-ink3">
-                  ✓ / ✗ marks attendance. Attendees of completed sessions receive certificates automatically. QR check-in is available on-site.
+                  ✓ / ✗ marks attendance. QR check-in is available on-site.
                 </p>
               )}
             </Card>

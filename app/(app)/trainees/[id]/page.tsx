@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Award, CalendarDays, CheckCircle2, ClipboardList, Mail, XCircle } from "lucide-react";
+import { ArrowLeft, CalendarDays, CheckCircle2, ClipboardList, Mail, XCircle } from "lucide-react";
 import { getDb } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { Card, Avatar, Badge, StatCard } from "@/components/ui";
@@ -25,7 +25,6 @@ export default async function TraineeDetailPage({ params }: { params: Promise<{ 
     })
     .filter(Boolean)
     .sort((a, b) => (a!.event.date < b!.event.date ? 1 : -1)) as { reg: (typeof regs)[0]; event: (typeof db.events)[0] }[];
-  const certs = db.certificates.filter((c) => c.userId === id);
   const feedback = db.feedback.filter((f) => f.userId === id);
   const attended = regs.filter((r) => r.attended === true).length;
   const missed = regs.filter((r) => r.attended === false).length;
@@ -54,18 +53,17 @@ export default async function TraineeDetailPage({ params }: { params: Promise<{ 
             <DeleteUser
               endpoint={`/api/trainees/${trainee.id}`}
               name={trainee.name}
-              warning="This permanently removes the account together with all registrations, certificates and feedback. This cannot be undone."
+              warning="This permanently removes the account together with all registrations and feedback. This cannot be undone."
               redirectTo="/trainees"
             />
           )}
         </div>
       </Card>
 
-      <div className="mb-6 grid grid-cols-2 gap-4 xl:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-4 xl:grid-cols-3">
         <StatCard label="Registrations" value={regs.length} icon={<ClipboardList size={19} />} accent="var(--s1)" />
         <StatCard label="Attended" value={attended} icon={<CheckCircle2 size={19} />} accent="var(--s2)" />
         <StatCard label="Missed" value={missed} icon={<XCircle size={19} />} accent="var(--crit)" />
-        <StatCard label="Certificates" value={certs.length} icon={<Award size={19} />} accent="var(--s4)" />
       </div>
 
       <Card className="overflow-x-auto">
@@ -81,13 +79,11 @@ export default async function TraineeDetailPage({ params }: { params: Promise<{ 
               <th className="px-5 py-3.5 font-semibold">Platform</th>
               <th className="px-5 py-3.5 font-semibold">Attendance</th>
               <th className="px-5 py-3.5 font-semibold">Rating given</th>
-              <th className="px-5 py-3.5 font-semibold">Certificate</th>
             </tr>
           </thead>
           <tbody>
             {history.map(({ reg, event }) => {
               const trainer = db.users.find((u) => u.id === event.trainerId);
-              const cert = certs.find((c) => c.eventId === event.id);
               const fb = feedback.find((f) => f.eventId === event.id);
               return (
                 <tr key={event.id} className="border-b border-line/60 last:border-0">
@@ -107,18 +103,11 @@ export default async function TraineeDetailPage({ params }: { params: Promise<{ 
                     {reg.attended === null && <Badge tone="gray">Pending</Badge>}
                   </td>
                   <td className="px-5 py-3.5 text-ink2">{fb ? `★ ${fb.rating}/5` : "—"}</td>
-                  <td className="px-5 py-3.5">
-                    {cert ? (
-                      <Link href={`/certificates/${cert.id}`} className="text-xs font-semibold text-primary hover:underline">{cert.code}</Link>
-                    ) : (
-                      <span className="text-xs text-ink3">—</span>
-                    )}
-                  </td>
                 </tr>
               );
             })}
             {!history.length && (
-              <tr><td colSpan={7} className="px-5 py-8 text-center text-xs text-ink3">No registrations yet.</td></tr>
+              <tr><td colSpan={6} className="px-5 py-8 text-center text-xs text-ink3">No registrations yet.</td></tr>
             )}
           </tbody>
         </table>

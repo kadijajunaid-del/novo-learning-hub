@@ -41,16 +41,6 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     audit(db, user.name, "event.published", event.title);
   } else if (action === "complete") {
     event.status = "completed";
-    // Issue certificates to everyone marked as attended.
-    for (const rg of db.registrations.filter((r) => r.eventId === event.id && r.attended === true)) {
-      if (!db.certificates.some((c) => c.eventId === event.id && c.userId === rg.userId)) {
-        db.certificates.push({
-          id: uid("ct"), eventId: event.id, userId: rg.userId,
-          code: `NN-${event.id.toUpperCase()}-${rg.userId.slice(2).toUpperCase()}-${new Date().getFullYear()}`,
-          issuedAt: new Date().toISOString(),
-        });
-      }
-    }
     audit(db, user.name, "event.completed", event.title);
   } else if (action === "duplicate") {
     const copy = { ...event, id: uid("ev"), title: `${event.title} (Copy)`, status: "draft" as const, meetingLink: "", createdAt: new Date().toISOString() };

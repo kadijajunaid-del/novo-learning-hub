@@ -16,7 +16,6 @@ const TABS = [
   { key: "attendance", label: "Attendance" },
   { key: "trainers", label: "Trainer performance" },
   { key: "participation", label: "Employee participation" },
-  { key: "certificates", label: "Certificates" },
   { key: "feedback", label: "Feedback & ratings" },
   { key: "upcoming", label: "Upcoming" },
   { key: "missed", label: "Missed trainings" },
@@ -34,7 +33,7 @@ export default async function ReportsPage({
   const user = await getSessionUser();
   if (!user || user.role === "trainee") redirect("/dashboard");
   const db = await getDb();
-  const exportType = ["training", "attendance", "trainers", "participation", "certificates", "feedback"].includes(type) ? type : "training";
+  const exportType = ["training", "attendance", "trainers", "participation", "feedback"].includes(type) ? type : "training";
   const hasFilters = Boolean(trainer || category || department || from || to);
 
   // ---- shared filter predicates ----
@@ -211,20 +210,6 @@ export default async function ReportsPage({
                 rs.filter((r) => r.attended === false).length,
               ];
             })}
-        />
-      )}
-
-      {type === "certificates" && (
-        <ReportTable
-          head={["Certificate", "Employee", "Training", "Issued"]}
-          rows={db.certificates
-            .filter((c) => eventIds.has(c.eventId) && userMatch(c.userId))
-            .map((c) => [
-              c.code,
-              db.users.find((u) => u.id === c.userId)?.name ?? "—",
-              db.events.find((e) => e.id === c.eventId)?.title ?? "—",
-              c.issuedAt.slice(0, 10),
-            ])}
         />
       )}
 

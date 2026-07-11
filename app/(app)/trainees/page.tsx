@@ -83,7 +83,7 @@ export default async function TraineesPage() {
                         <DeleteUser
                           endpoint={`/api/trainees/${t.id}`}
                           name={t.name}
-                          warning="This permanently removes the account together with all registrations, certificates and feedback. This cannot be undone."
+                          warning="This permanently removes the account together with all registrations and feedback. This cannot be undone."
                         />
                       )}
                     </div>

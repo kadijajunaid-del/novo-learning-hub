@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   CalendarDays, CalendarCheck2, Users, GraduationCap, CheckCircle2, Hourglass,
-  ClipboardList, Star, Percent, Bell, Activity, Award, TrendingUp, Sparkles, Plus,
+  ClipboardList, Star, Percent, Bell, Activity, TrendingUp, Sparkles, Plus,
 } from "lucide-react";
 import { getDb } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
@@ -227,7 +227,6 @@ function TraineeDashboard({ db, user }: { db: DB; user: User }) {
   const myEventIds = myRegs.map((r) => r.eventId);
   const registeredUpcoming = db.events.filter((e) => myEventIds.includes(e.id) && isUpcoming(e));
   const history = db.events.filter((e) => myEventIds.includes(e.id) && (e.status === "completed" || e.date < todayISO()));
-  const myCerts = db.certificates.filter((c) => c.userId === user.id);
   const attended = myRegs.filter((r) => r.attended === true).length;
   const decided = myRegs.filter((r) => r.attended !== null).length;
   const progress = decided ? Math.round((attended / decided) * 100) : 0;
@@ -237,11 +236,10 @@ function TraineeDashboard({ db, user }: { db: DB; user: User }) {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
         <StatCard href="/calendar" label="Upcoming trainings" value={registeredUpcoming.length} icon={<CalendarDays size={19} />} accent="var(--s1)" sub="You are registered" />
         <StatCard href="/events" label="Total registrations" value={myRegs.length} icon={<ClipboardList size={19} />} accent="#001965" />
-        <StatCard href="/certificates" label="Certificates" value={myCerts.length} icon={<Award size={19} />} accent="var(--s4)" sub="Download anytime" />
-        <StatCard href="/certificates" label="Completion rate" value={`${progress}%`} icon={<TrendingUp size={19} />} accent="var(--s2)" sub={`${attended} of ${decided || "0"} attended`} />
+        <StatCard href="/events" label="Completion rate" value={`${progress}%`} icon={<TrendingUp size={19} />} accent="var(--s2)" sub={`${attended} of ${decided || "0"} attended`} />
       </div>
 
       <div>
@@ -274,44 +272,35 @@ function TraineeDashboard({ db, user }: { db: DB; user: User }) {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="p-5 lg:col-span-2">
-          <SectionHeader title="Training history" action={<Link href="/certificates" className="text-xs font-semibold text-primary hover:underline">My certificates</Link>} />
+          <SectionHeader title="Training history" />
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-ink3">
                   <th className="pb-2 pr-4 font-semibold">Training</th>
                   <th className="pb-2 pr-4 font-semibold">Date</th>
-                  <th className="pb-2 pr-4 font-semibold">Status</th>
-                  <th className="pb-2 font-semibold">Certificate</th>
+                  <th className="pb-2 font-semibold">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {history.map((e) => {
                   const reg = myRegs.find((r) => r.eventId === e.id);
-                  const cert = myCerts.find((c) => c.eventId === e.id);
                   return (
                     <tr key={e.id} className="border-b border-line/60 last:border-0">
                       <td className="py-2.5 pr-4">
                         <Link href={`/events/${e.id}`} className="font-medium text-ink hover:text-primary">{e.title}</Link>
                       </td>
                       <td className="py-2.5 pr-4 text-ink2">{fmtDateShort(e.date)}</td>
-                      <td className="py-2.5 pr-4">
+                      <td className="py-2.5">
                         {reg?.attended === true && <Badge tone="green">Attended</Badge>}
                         {reg?.attended === false && <Badge tone="red">Missed</Badge>}
                         {reg?.attended === null && <Badge tone="gray">Pending</Badge>}
-                      </td>
-                      <td className="py-2.5">
-                        {cert ? (
-                          <Link href={`/certificates/${cert.id}`} className="text-xs font-semibold text-primary hover:underline">View</Link>
-                        ) : (
-                          <span className="text-xs text-ink3">—</span>
-                        )}
                       </td>
                     </tr>
                   );
                 })}
                 {!history.length && (
-                  <tr><td colSpan={4} className="py-6 text-center text-xs text-ink3">Your completed trainings will appear here.</td></tr>
+                  <tr><td colSpan={3} className="py-6 text-center text-xs text-ink3">Your completed trainings will appear here.</td></tr>
                 )}
               </tbody>
             </table>

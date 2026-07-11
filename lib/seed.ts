@@ -90,16 +90,8 @@ export function buildSeed(): DB {
     }
   }
 
-  // Certificates for attended completed trainings.
-  const certificates: Certificate[] = registrations
-    .filter((rg) => rg.attended === true)
-    .map((rg, i) => ({
-      id: `ct${String(i + 1).padStart(3, "0")}`,
-      eventId: rg.eventId,
-      userId: rg.userId,
-      code: `NN-${rg.eventId.toUpperCase()}-${rg.userId.slice(2).toUpperCase()}-2026`,
-      issuedAt: at(-4, 17),
-    }));
+  // Certificates are not used on this platform.
+  const certificates: Certificate[] = [];
 
   const feedback: Feedback[] = [
     { id: "fb01", eventId: "ev01", userId: "u_e1", rating: 5, comment: "Fantastic welcome — I finally understand the Novo Nordisk Way.", at: at(-25, 14) },
