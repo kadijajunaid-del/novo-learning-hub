@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getDb } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import SettingsForm from "@/components/settings-form";
+import ResetData from "@/components/reset-data";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,9 @@ export default async function SettingsPage() {
         <p className="mt-1 text-sm text-ink3">Configure trainers, departments, categories, working hours, branding and integrations.</p>
       </div>
       <SettingsForm settings={db.settings} />
+      <div className="mt-6">
+        <ResetData />
+      </div>
     </div>
   );
 }

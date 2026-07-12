@@ -9,21 +9,17 @@ npm install
 npm run dev        # http://localhost:3040
 ```
 
-On your own machine the demo database seeds itself on first run into `data/db.json` (delete that file to reset all demo data — it regenerates with events dated around "today"). When deployed with Upstash Redis connected (`UPSTASH_REDIS_REST_URL`/`_TOKEN` or `KV_REST_API_*` env vars), the same data lives in Redis instead.
+The platform starts with a clean database: just the three sign-in accounts below and the default settings. All content (events, registrations, notifications) is created through the app. On your own machine data lives in `data/db.json`; when deployed with Upstash Redis connected (`UPSTASH_REDIS_REST_URL`/`_TOKEN` or `KV_REST_API_*` env vars), it lives in Redis instead. An admin can wipe everything back to the clean slate from Settings → Reset platform data.
 
-## Demo accounts
+## Accounts
 
 | Role | Email | Password |
 |---|---|---|
 | Administrator | admin@novonordisk.com | Admin@123 |
-| Trainer (generic) | trainer@novonordisk.com | Trainer@123 |
-| Trainee (generic) | trainee@novonordisk.com | Trainee@123 |
-| Trainer | lars.jensen@novonordisk.com | Trainer@123 |
-| Trainer | mette.sorensen@novonordisk.com | Trainer@123 |
-| Trainee | amira.hassan@novonordisk.com | Trainee@123 |
-| Trainee | yusuf.khan@novonordisk.com | Trainee@123 |
+| Trainer | trainer@novonordisk.com | Trainer@123 |
+| Trainee | trainee@novonordisk.com | Trainee@123 |
 
-The login page also has one-click demo sign-in buttons.
+The administrator creates additional trainer accounts from the Trainers page.
 
 ## What's real vs. simulated
 
