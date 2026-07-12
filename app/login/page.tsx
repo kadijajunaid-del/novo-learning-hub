@@ -45,7 +45,7 @@ export default function LoginPage() {
 
         <div className="glass card fade-up border-white/20 p-7 !bg-white/95 dark:!bg-[#101b30]/90">
           <h2 className="text-lg font-bold text-ink">Sign in to your account</h2>
-          <p className="mt-1 text-sm text-ink3">Employee training & event management portal</p>
+          <p className="mt-1 text-sm text-ink3">Employee training portal</p>
 
           <form
             className="mt-6 space-y-4"
