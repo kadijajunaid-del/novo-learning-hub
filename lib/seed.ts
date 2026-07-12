@@ -18,6 +18,8 @@ function at(offsetDays: number, h: number): string {
 export function buildSeed(): DB {
   const users: User[] = [
     { id: "u_admin", name: "Sofia Lindqvist", email: "admin@novonordisk.com", password: "Admin@123", role: "admin", department: "People & Organisation", title: "L&D Administrator", active: true, joined: iso(-400) },
+    { id: "u_trainer", name: "Demo Trainer", email: "trainer@novonordisk.com", password: "Trainer@123", role: "trainer", department: "People & Organisation", title: "Trainer", active: true, joined: iso(-90) },
+    { id: "u_trainee", name: "Demo Trainee", email: "trainee@novonordisk.com", password: "Trainee@123", role: "trainee", department: "People & Organisation", title: "New Hire", active: true, joined: iso(-7) },
     { id: "u_t1", name: "Lars Jensen", email: "lars.jensen@novonordisk.com", password: "Trainer@123", role: "trainer", department: "Clinical Operations", title: "Clinical Training Lead", active: true, joined: iso(-380) },
     { id: "u_t2", name: "Mette Sørensen", email: "mette.sorensen@novonordisk.com", password: "Trainer@123", role: "trainer", department: "Quality Assurance", title: "Quality & Compliance Trainer", active: true, joined: iso(-350) },
     { id: "u_t3", name: "Omar Al-Farsi", email: "omar.alfarsi@novonordisk.com", password: "Trainer@123", role: "trainer", department: "Commercial", title: "Commercial Excellence Trainer", active: true, joined: iso(-300) },

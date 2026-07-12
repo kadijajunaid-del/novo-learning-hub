@@ -22,6 +22,24 @@ declare global {
   var __nnDb: DB | undefined;
 }
 
+// Generic demo sign-ins. Ensured on every load so databases created before
+// these accounts existed (e.g. an already-seeded Redis store) get them too.
+const GENERIC_ACCOUNTS: DB["users"] = [
+  { id: "u_trainer", name: "Demo Trainer", email: "trainer@novonordisk.com", password: "Trainer@123", role: "trainer", department: "People & Organisation", title: "Trainer", active: true, joined: "2026-04-13" },
+  { id: "u_trainee", name: "Demo Trainee", email: "trainee@novonordisk.com", password: "Trainee@123", role: "trainee", department: "People & Organisation", title: "New Hire", active: true, joined: "2026-07-05" },
+];
+
+function ensureGenericAccounts(db: DB): boolean {
+  let changed = false;
+  for (const acc of GENERIC_ACCOUNTS) {
+    if (!db.users.some((u) => u.email === acc.email)) {
+      db.users.push({ ...acc });
+      changed = true;
+    }
+  }
+  return changed;
+}
+
 async function redis(cmd: (string | number)[]): Promise<any> {
   const res = await fetch(REST_URL!, {
     method: "POST",
@@ -36,14 +54,20 @@ async function redis(cmd: (string | number)[]): Promise<any> {
 export async function getDb(): Promise<DB> {
   if (useRedis) {
     const raw = await redis(["GET", REDIS_KEY]);
-    if (raw) return JSON.parse(raw) as DB;
+    if (raw) {
+      const db = JSON.parse(raw) as DB;
+      if (ensureGenericAccounts(db)) await redis(["SET", REDIS_KEY, JSON.stringify(db)]);
+      return db;
+    }
     const seed = buildSeed();
     await redis(["SET", REDIS_KEY, JSON.stringify(seed)]);
     return seed;
   }
   try {
     if (fs.existsSync(DB_PATH)) {
-      return JSON.parse(fs.readFileSync(DB_PATH, "utf-8")) as DB;
+      const db = JSON.parse(fs.readFileSync(DB_PATH, "utf-8")) as DB;
+      if (ensureGenericAccounts(db)) fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+      return db;
     }
     const seed = buildSeed();
     fs.mkdirSync(DB_DIR, { recursive: true });

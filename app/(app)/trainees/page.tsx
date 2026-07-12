@@ -9,17 +9,31 @@ import { fmtDateShort } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
-export default async function TraineesPage() {
+const inputCls =
+  "rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-primary";
+
+export default async function TraineesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; department?: string; from?: string; to?: string }>;
+}) {
+  const { q = "", department = "", from = "", to = "" } = await searchParams;
   const user = await getSessionUser();
   if (!user || user.role === "trainee") redirect("/dashboard");
   const db = await getDb();
+  const hasFilters = Boolean(q || department || from || to);
 
   // Trainers see the people registered for their sessions; admin sees everyone.
   const myEventIds = user.role === "trainer" ? db.events.filter((e) => e.trainerId === user.id).map((e) => e.id) : null;
+  const needle = q.trim().toLowerCase();
   const trainees = db.users.filter((u) => {
     if (u.role !== "trainee") return false;
-    if (!myEventIds) return true;
-    return db.registrations.some((r) => r.userId === u.id && myEventIds.includes(r.eventId));
+    if (myEventIds && !db.registrations.some((r) => r.userId === u.id && myEventIds.includes(r.eventId))) return false;
+    if (needle && !`${u.name} ${u.email} ${u.title}`.toLowerCase().includes(needle)) return false;
+    if (department && u.department !== department) return false;
+    if (from && u.joined < from) return false;
+    if (to && u.joined > to) return false;
+    return true;
   });
 
   return (
@@ -32,6 +46,32 @@ export default async function TraineesPage() {
           {trainees.length} new hire{trainees.length === 1 ? "" : "s"} onboarding — click a person for their full training history.
         </p>
       </div>
+
+      <form method="GET" className="card mb-6 flex flex-wrap items-end gap-3 p-4">
+        <div className="min-w-44 flex-1">
+          <label className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-ink3">Employee</label>
+          <input name="q" defaultValue={q} placeholder="Name, email or job title…" className={`${inputCls} w-full`} />
+        </div>
+        <div>
+          <label className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-ink3">Department</label>
+          <select name="department" defaultValue={department} className={inputCls}>
+            <option value="">All departments</option>
+            {db.settings.departments.map((d) => <option key={d}>{d}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-ink3">Joined from</label>
+          <input type="date" name="from" defaultValue={from} className={inputCls} />
+        </div>
+        <div>
+          <label className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-ink3">Joined to</label>
+          <input type="date" name="to" defaultValue={to} className={inputCls} />
+        </div>
+        <button className="rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 dark:bg-primary">Apply filters</button>
+        {hasFilters && (
+          <Link href="/trainees" className="rounded-lg border border-line px-4 py-2 text-sm font-medium text-ink2 transition hover:bg-surface2">Reset</Link>
+        )}
+      </form>
 
       <Card className="overflow-x-auto">
         <table className="w-full min-w-[820px] text-sm">
@@ -92,7 +132,7 @@ export default async function TraineesPage() {
               );
             })}
             {!trainees.length && (
-              <tr><td colSpan={8} className="px-5 py-8 text-center text-xs text-ink3">No trainees yet.</td></tr>
+              <tr><td colSpan={8} className="px-5 py-8 text-center text-xs text-ink3">No trainees match the current filters.</td></tr>
             )}
           </tbody>
         </table>

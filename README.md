@@ -16,6 +16,8 @@ On your own machine the demo database seeds itself on first run into `data/db.js
 | Role | Email | Password |
 |---|---|---|
 | Administrator | admin@novonordisk.com | Admin@123 |
+| Trainer (generic) | trainer@novonordisk.com | Trainer@123 |
+| Trainee (generic) | trainee@novonordisk.com | Trainee@123 |
 | Trainer | lars.jensen@novonordisk.com | Trainer@123 |
 | Trainer | mette.sorensen@novonordisk.com | Trainer@123 |
 | Trainee | amira.hassan@novonordisk.com | Trainee@123 |

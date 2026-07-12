@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   LayoutDashboard, CalendarDays, GraduationCap, Users, BarChart3, Bell, Settings,
-  Search, Sun, Moon, LogOut, Menu, X, BookOpen,
+  Sun, Moon, LogOut, Menu, X, BookOpen,
 } from "lucide-react";
 import { Avatar } from "./ui";
 
@@ -84,7 +84,6 @@ export default function Shell({
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [q, setQ] = useState("");
   const nav = NAV[user.role] ?? NAV.trainee;
 
   const logout = async () => {
@@ -167,21 +166,6 @@ export default function Shell({
         <button aria-label="Open menu" className="lg:hidden" onClick={() => setOpen(true)}>
           <Menu size={22} className="text-ink2" />
         </button>
-        <form
-          className="relative max-w-md flex-1"
-          onSubmit={(e) => {
-            e.preventDefault();
-            router.push(`/events?q=${encodeURIComponent(q)}`);
-          }}
-        >
-          <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink3" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search trainings, trainers, categories…"
-            className="w-full rounded-full border border-line bg-surface py-2 pl-9 pr-4 text-sm text-ink outline-none transition placeholder:text-ink3 focus:border-primary focus:ring-2 focus:ring-primary/20"
-          />
-        </form>
         <div className="ml-auto flex items-center gap-2">
           <ThemeToggle />
           <Link

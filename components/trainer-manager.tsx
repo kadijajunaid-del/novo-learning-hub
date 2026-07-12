@@ -36,8 +36,16 @@ export default function TrainerManager({
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [search, setSearch] = useState("");
+  const [deptFilter, setDeptFilter] = useState("");
 
   const activeCount = trainers.filter((t) => t.active).length;
+  const needle = search.trim().toLowerCase();
+  const visible = trainers.filter(
+    (t) =>
+      (!needle || `${t.name} ${t.email} ${t.title}`.toLowerCase().includes(needle)) &&
+      (!deptFilter || t.department === deptFilter),
+  );
 
   const openCreate = () => {
     setF({ name: "", email: "", department: departments[0] ?? "", title: "" });
@@ -102,6 +110,33 @@ export default function TrainerManager({
         </p>
       )}
 
+      <div className="card mb-5 flex flex-wrap items-end gap-3 p-4">
+        <div className="min-w-44 flex-1">
+          <label className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-ink3">Trainer</label>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Name, email or job title…"
+            className={inputCls}
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-ink3">Department</label>
+          <select value={deptFilter} onChange={(e) => setDeptFilter(e.target.value)} className={`${inputCls} !w-auto`}>
+            <option value="">All departments</option>
+            {departments.map((d) => <option key={d}>{d}</option>)}
+          </select>
+        </div>
+        {(search || deptFilter) && (
+          <button
+            onClick={() => { setSearch(""); setDeptFilter(""); }}
+            className="rounded-lg border border-line px-4 py-2 text-sm font-medium text-ink2 transition hover:bg-surface2"
+          >
+            Reset
+          </button>
+        )}
+      </div>
+
       <div className="card overflow-x-auto">
         <table className="w-full min-w-[720px] text-sm">
           <thead>
@@ -115,7 +150,10 @@ export default function TrainerManager({
             </tr>
           </thead>
           <tbody>
-            {trainers.map((t) => (
+            {!visible.length && (
+              <tr><td colSpan={6} className="px-5 py-8 text-center text-xs text-ink3">No trainers match the current filters.</td></tr>
+            )}
+            {visible.map((t) => (
               <tr key={t.id} className="border-b border-line/60 last:border-0">
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-3">
