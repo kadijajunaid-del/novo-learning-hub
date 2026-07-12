@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  ArrowLeft, CalendarDays, Clock, Download, FileText, Globe2, Info, ListChecks,
+  ArrowLeft, CalendarDays, CalendarPlus, Clock, Download, FileText, Globe2, Info, ListChecks,
   MapPin, Star, Users, Video, Repeat, Eye, BellRing,
 } from "lucide-react";
 import { getDb } from "@/lib/db";
@@ -141,7 +141,19 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
               {user.role === "trainee" && event.status === "cancelled" && (
                 <p className="rounded-xl bg-crit/10 px-4 py-3 text-sm font-medium text-crit">This event was cancelled. Registered participants have been notified.</p>
               )}
-              {canManage && <EventActions eventId={event.id} status={event.status} />}
+              {canManage && (
+                <div className="space-y-3">
+                  <EventActions eventId={event.id} status={event.status} />
+                  {event.status === "published" && (
+                    <a
+                      href={`/api/events/${event.id}/ics`}
+                      className="inline-flex items-center gap-2 rounded-xl border border-line px-4 py-2.5 text-sm font-semibold text-ink2 transition hover:bg-surface2"
+                    >
+                      <CalendarPlus size={15} /> Add to Outlook Calendar (.ics)
+                    </a>
+                  )}
+                </div>
+              )}
             </section>
           </div>
 
