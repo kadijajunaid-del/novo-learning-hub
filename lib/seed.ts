@@ -36,32 +36,51 @@ export function buildSeed(): DB {
     createdAt: new Date().toISOString(),
   };
 
+  const teams = (slug: string) => `https://teams.microsoft.com/l/meetup-join/19%3ameeting_${slug}%40thread.v2/0`;
+  const zoom = (n: string) => `https://novonordisk.zoom.us/j/${n}?pwd=crmfundamentals`;
+
+  // Each event is a programme of sessions; each session is its own meeting.
   const events: TrainingEvent[] = [
     {
       id: "ev_test1", title: "New Employee Orientation", category: "Onboarding",
-      description: "Welcome to Novo Nordisk: our purpose, the Novo Nordisk Way, and everything you need for a smooth start.",
-      trainerId: "u_t1", date: iso(1), startTime: "09:00", endTime: "12:00",
-      platform: "Microsoft Teams", venue: "Online", maxParticipants: 30,
+      description: "Welcome to Novo Nordisk: our purpose, the Novo Nordisk Way, and everything you need for a smooth start. Three half-day sessions.",
+      trainerId: "u_t1", maxParticipants: 30,
       agenda: ["Welcome & introductions", "Our history and purpose", "The Novo Nordisk Way", "Q&A"],
-      meetingLink: "https://teams.microsoft.com/l/meetup-join/19%3ameeting_neworientation01%40thread.v2/0",
+      sessions: [
+        { id: "ss_or1", date: iso(1), startTime: "09:00", endTime: "12:00", platform: "Microsoft Teams", venue: "Online", meetingLink: teams("orientation01") },
+        { id: "ss_or2", date: iso(2), startTime: "09:00", endTime: "12:00", platform: "Microsoft Teams", venue: "Online", meetingLink: teams("orientation02") },
+        { id: "ss_or3", date: iso(3), startTime: "09:00", endTime: "12:00", platform: "Microsoft Teams", venue: "Online", meetingLink: teams("orientation03") },
+      ],
+      date: iso(1), startTime: "09:00", endTime: "12:00", platform: "Microsoft Teams", venue: "Online",
+      meetingLink: teams("orientation01"),
       ...eventBase,
     },
     {
       id: "ev_test2", title: "GxP & Compliance Basics", category: "Compliance & GxP",
-      description: "Mandatory introduction to Good Practice (GxP) principles, documentation standards and data integrity.",
-      trainerId: "u_t3", date: iso(4), startTime: "10:00", endTime: "13:00",
-      platform: "Physical Meeting", venue: "HQ Training Room 2", maxParticipants: 20,
+      description: "Mandatory introduction to Good Practice (GxP) principles, documentation standards and data integrity. Two classroom sessions.",
+      trainerId: "u_t3", maxParticipants: 20,
       agenda: ["Why GxP matters", "Documentation practices", "Data integrity", "Assessment"],
+      sessions: [
+        { id: "ss_gx1", date: iso(4), startTime: "10:00", endTime: "13:00", platform: "Physical Meeting", venue: "HQ Training Room 2", meetingLink: "" },
+        { id: "ss_gx2", date: iso(5), startTime: "10:00", endTime: "13:00", platform: "Physical Meeting", venue: "HQ Training Room 2", meetingLink: "" },
+      ],
+      date: iso(4), startTime: "10:00", endTime: "13:00", platform: "Physical Meeting", venue: "HQ Training Room 2",
       meetingLink: "",
       ...eventBase,
     },
     {
       id: "ev_test3", title: "CRM Fundamentals", category: "Commercial Excellence",
-      description: "How we use our CRM platform for customer engagement planning, call reporting and territory analytics.",
-      trainerId: "u_t2", date: iso(7), startTime: "14:00", endTime: "16:00",
-      platform: "Zoom", venue: "Online", maxParticipants: 25,
-      agenda: ["CRM tour", "Call planning", "Reporting KPIs"],
-      meetingLink: "https://novonordisk.zoom.us/j/9124857630?pwd=crmfundamentals01",
+      description: "How we use our CRM platform for customer engagement planning, call reporting and territory analytics. Four afternoon sessions.",
+      trainerId: "u_t2", maxParticipants: 25,
+      agenda: ["CRM tour", "Call planning", "Reporting KPIs", "Hands-on practice"],
+      sessions: [
+        { id: "ss_cr1", date: iso(7), startTime: "14:00", endTime: "16:00", platform: "Zoom", venue: "Online", meetingLink: zoom("9124857631") },
+        { id: "ss_cr2", date: iso(8), startTime: "14:00", endTime: "16:00", platform: "Zoom", venue: "Online", meetingLink: zoom("9124857632") },
+        { id: "ss_cr3", date: iso(9), startTime: "14:00", endTime: "16:00", platform: "Zoom", venue: "Online", meetingLink: zoom("9124857633") },
+        { id: "ss_cr4", date: iso(10), startTime: "14:00", endTime: "16:00", platform: "Zoom", venue: "Online", meetingLink: zoom("9124857634") },
+      ],
+      date: iso(7), startTime: "14:00", endTime: "16:00", platform: "Zoom", venue: "Online",
+      meetingLink: zoom("9124857631"),
       ...eventBase,
     },
   ];

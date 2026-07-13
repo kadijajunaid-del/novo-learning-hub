@@ -21,12 +21,25 @@ export type Platform =
   | "Cisco Webex"
   | "Physical Meeting";
 
+export interface EventSession {
+  id: string;
+  date: string; // YYYY-MM-DD
+  startTime: string; // HH:mm
+  endTime: string; // HH:mm
+  platform: Platform;
+  venue: string;
+  meetingLink: string;
+}
+
 export interface TrainingEvent {
   id: string;
   title: string;
   description: string;
   trainerId: string;
   category: string;
+  /** Sessions are the source of truth; the date/time/platform fields below
+   *  mirror the first session so lists, cards and reports keep working. */
+  sessions: EventSession[];
   date: string; // YYYY-MM-DD
   startTime: string; // HH:mm
   endTime: string; // HH:mm

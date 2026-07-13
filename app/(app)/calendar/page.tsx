@@ -1,5 +1,6 @@
 import { getDb } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
+import { eventSessions } from "@/lib/queries";
 import MonthCalendar, { type CalEvent } from "@/components/month-calendar";
 
 export const dynamic = "force-dynamic";
@@ -12,18 +13,22 @@ export default async function CalendarPage() {
   if (user.role === "trainee") events = events.filter((e) => e.status !== "draft");
   if (user.role === "trainer") events = events.filter((e) => e.trainerId === user.id);
 
-  const payload: CalEvent[] = events.map((e) => ({
-    id: e.id,
-    title: e.title,
-    date: e.date,
-    startTime: e.startTime,
-    endTime: e.endTime,
-    status: e.status,
-    platform: e.platform,
-    venue: e.venue,
-    trainer: db.users.find((u) => u.id === e.trainerId)?.name ?? "",
-    description: e.description,
-  }));
+  // One calendar entry per session, labelled "Sn/N" for multi-session programmes.
+  const payload: CalEvent[] = events.flatMap((e) => {
+    const sessions = eventSessions(e);
+    return sessions.map((s, i) => ({
+      id: e.id,
+      title: sessions.length > 1 ? `${e.title} (S${i + 1}/${sessions.length})` : e.title,
+      date: s.date,
+      startTime: s.startTime,
+      endTime: s.endTime,
+      status: e.status,
+      platform: s.platform,
+      venue: s.venue,
+      trainer: db.users.find((u) => u.id === e.trainerId)?.name ?? "",
+      description: e.description,
+    }));
+  });
 
   return (
     <div className="mx-auto max-w-6xl">

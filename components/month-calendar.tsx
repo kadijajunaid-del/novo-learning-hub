@@ -96,7 +96,7 @@ export default function MonthCalendar({ events }: { events: CalEvent[] }) {
                     <div className="space-y-1">
                       {byDay(d).slice(0, 3).map((e) => (
                         <button
-                          key={e.id}
+                          key={`${e.id}-${e.date}-${e.startTime}`}
                           onClick={() => setSelected(e)}
                           className="block w-full truncate rounded-md px-1.5 py-1 text-left text-[11px] font-semibold text-white transition hover:opacity-85"
                           style={{ background: STATUS_COLOR[eventKind(e)] }}

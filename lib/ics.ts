@@ -1,4 +1,5 @@
 import type { TrainingEvent, User } from "./types";
+import { eventSessions } from "./queries";
 
 const REMINDER_MINUTES: Record<string, number> = {
   "15 mins": 15,
@@ -16,49 +17,59 @@ function dt(date: string, time: string): string {
 }
 
 /**
- * Builds an Outlook-compatible calendar invitation (.ics) with the meeting
- * link, agenda, trainer, location, description and an automatic reminder.
+ * Builds an Outlook-compatible calendar invitation (.ics) containing one
+ * calendar entry per session, each with its own meeting link, location,
+ * agenda, trainer and reminder alarm.
  */
 export function buildIcs(event: TrainingEvent, trainer: User | undefined, attendee: User): string {
   const minutes = REMINDER_MINUTES[event.reminder] ?? 60;
-  const descriptionParts = [
-    event.description,
-    "",
-    trainer ? `Trainer: ${trainer.name} (${trainer.email})` : "",
-    event.meetingLink ? `Join: ${event.meetingLink}` : "",
-    event.agenda.length ? `Agenda:\n${event.agenda.map((a, i) => `${i + 1}. ${a}`).join("\n")}` : "",
-    event.prerequisites && event.prerequisites !== "None" ? `Prerequisites: ${event.prerequisites}` : "",
-    event.materials.length ? `Materials: ${event.materials.map((m) => m.name).join(", ")}` : "",
-    event.instructions ? `Instructions: ${event.instructions}` : "",
-  ].filter(Boolean);
+  const sessions = eventSessions(event);
+  const total = sessions.length;
+  const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z");
 
-  const location = event.platform === "Physical Meeting" ? event.venue : `${event.platform} — ${event.meetingLink}`;
+  const vevents = sessions.flatMap((s, i) => {
+    const label = total > 1 ? `${event.title} — Session ${i + 1} of ${total}` : event.title;
+    const descriptionParts = [
+      event.description,
+      "",
+      total > 1 ? `Session ${i + 1} of ${total}` : "",
+      trainer ? `Trainer: ${trainer.name} (${trainer.email})` : "",
+      s.meetingLink ? `Join: ${s.meetingLink}` : "",
+      event.agenda.length ? `Agenda:\n${event.agenda.map((a, n) => `${n + 1}. ${a}`).join("\n")}` : "",
+      event.prerequisites && event.prerequisites !== "None" ? `Prerequisites: ${event.prerequisites}` : "",
+      event.materials.length ? `Materials: ${event.materials.map((m) => m.name).join(", ")}` : "",
+      event.instructions ? `Instructions: ${event.instructions}` : "",
+    ].filter(Boolean);
+    const location = s.platform === "Physical Meeting" ? s.venue : `${s.platform} — ${s.meetingLink}`;
 
-  const lines = [
+    return [
+      "BEGIN:VEVENT",
+      `UID:${event.id}-${s.id}-${attendee.id}@learninghub.novonordisk.com`,
+      `DTSTAMP:${stamp}`,
+      `DTSTART;TZID=${event.timeZone}:${dt(s.date, s.startTime)}`,
+      `DTEND;TZID=${event.timeZone}:${dt(s.date, s.endTime)}`,
+      `SUMMARY:${icsEscape(label)}`,
+      `DESCRIPTION:${icsEscape(descriptionParts.join("\n"))}`,
+      `LOCATION:${icsEscape(location)}`,
+      s.meetingLink ? `URL:${s.meetingLink}` : "",
+      trainer ? `ORGANIZER;CN=${icsEscape(trainer.name)}:mailto:${trainer.email}` : "",
+      `ATTENDEE;CN=${icsEscape(attendee.name)};RSVP=TRUE:mailto:${attendee.email}`,
+      "STATUS:CONFIRMED",
+      "BEGIN:VALARM",
+      "ACTION:DISPLAY",
+      `DESCRIPTION:Reminder: ${icsEscape(label)}`,
+      `TRIGGER:-PT${minutes}M`,
+      "END:VALARM",
+      "END:VEVENT",
+    ].filter(Boolean);
+  });
+
+  return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
     "PRODID:-//Novo Nordisk//Learning Hub//EN",
     "METHOD:REQUEST",
-    "BEGIN:VEVENT",
-    `UID:${event.id}-${attendee.id}@learninghub.novonordisk.com`,
-    `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z")}`,
-    `DTSTART;TZID=${event.timeZone}:${dt(event.date, event.startTime)}`,
-    `DTEND;TZID=${event.timeZone}:${dt(event.date, event.endTime)}`,
-    `SUMMARY:${icsEscape(event.title)}`,
-    `DESCRIPTION:${icsEscape(descriptionParts.join("\n"))}`,
-    `LOCATION:${icsEscape(location)}`,
-    event.meetingLink ? `URL:${event.meetingLink}` : "",
-    trainer ? `ORGANIZER;CN=${icsEscape(trainer.name)}:mailto:${trainer.email}` : "",
-    `ATTENDEE;CN=${icsEscape(attendee.name)};RSVP=TRUE:mailto:${attendee.email}`,
-    "STATUS:CONFIRMED",
-    "BEGIN:VALARM",
-    "ACTION:DISPLAY",
-    `DESCRIPTION:Reminder: ${icsEscape(event.title)}`,
-    `TRIGGER:-PT${minutes}M`,
-    "END:VALARM",
-    "END:VEVENT",
+    ...vevents,
     "END:VCALENDAR",
-  ].filter(Boolean);
-
-  return lines.join("\r\n");
+  ].join("\r\n");
 }

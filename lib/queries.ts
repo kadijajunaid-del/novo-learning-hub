@@ -1,5 +1,28 @@
-import type { DB, Notification, TrainingEvent, User } from "./types";
+import type { DB, EventSession, Notification, TrainingEvent, User } from "./types";
 import { todayISO } from "./format";
+
+/** Sessions of an event, oldest first; falls back to the legacy single-date
+ *  fields for events created before multi-session support. */
+export function eventSessions(e: TrainingEvent): EventSession[] {
+  if (Array.isArray(e.sessions) && e.sessions.length) {
+    return [...e.sessions].sort((a, b) => (a.date === b.date ? (a.startTime < b.startTime ? -1 : 1) : a.date < b.date ? -1 : 1));
+  }
+  return [{ id: `${e.id}-s1`, date: e.date, startTime: e.startTime, endTime: e.endTime, platform: e.platform, venue: e.venue, meetingLink: e.meetingLink }];
+}
+
+/** Mirrors the first session into the event's legacy fields (used by cards,
+ *  reports and sorting) and keeps sessions ordered. Call after any write. */
+export function syncEventFromSessions(e: TrainingEvent): void {
+  if (!Array.isArray(e.sessions) || !e.sessions.length) return;
+  e.sessions.sort((a, b) => (a.date === b.date ? (a.startTime < b.startTime ? -1 : 1) : a.date < b.date ? -1 : 1));
+  const first = e.sessions[0];
+  e.date = first.date;
+  e.startTime = first.startTime;
+  e.endTime = first.endTime;
+  e.platform = first.platform;
+  e.venue = first.venue;
+  e.meetingLink = first.meetingLink;
+}
 
 export function notificationsFor(db: DB, user: User): Notification[] {
   const group = user.role === "trainer" ? "trainers" : user.role === "trainee" ? "trainees" : "";
@@ -35,11 +58,12 @@ export function attendancePct(db: DB, eventIds?: string[]): number | null {
 }
 
 export function isUpcoming(e: TrainingEvent): boolean {
-  return e.status === "published" && e.date >= todayISO();
+  // Upcoming as long as any session is still ahead (or today).
+  return e.status === "published" && eventSessions(e).some((s) => s.date >= todayISO());
 }
 
 export function isToday(e: TrainingEvent): boolean {
-  return e.status === "published" && e.date === todayISO();
+  return e.status === "published" && eventSessions(e).some((s) => s.date === todayISO());
 }
 
 /** Last n months as {label, key} pairs, oldest first. */

@@ -29,6 +29,7 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
         batches={db.settings.batches}
         departments={db.settings.departments}
         trainerName={trainer?.name ?? user.name}
+        trainers={user.role === "admin" ? db.users.filter((u) => u.role === "trainer" && u.active).map((t) => ({ id: t.id, name: t.name })) : undefined}
         existing={event}
       />
     </div>

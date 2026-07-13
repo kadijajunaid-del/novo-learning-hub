@@ -26,6 +26,7 @@ export function EventCard({
   seatsTaken?: number;
 }) {
   const st = statusTone(event.status, event.date);
+  const nSessions = event.sessions?.length || 1;
   return (
     <Link
       href={`/events/${event.id}`}
@@ -41,9 +42,15 @@ export function EventCard({
       <h3 className="mt-3 line-clamp-2 text-[15px] font-bold leading-snug text-ink">{event.title}</h3>
       <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-ink3">{event.description}</p>
       <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-ink2">
-        <span className="inline-flex items-center gap-1.5"><CalendarDays size={13} className="text-ink3" />{fmtDate(event.date)}</span>
+        <span className="inline-flex items-center gap-1.5"><CalendarDays size={13} className="text-ink3" />{nSessions > 1 ? "Starts " : ""}{fmtDate(event.date)}</span>
         <span className="inline-flex items-center gap-1.5"><Clock size={13} className="text-ink3" />{fmtTime(event.startTime)} – {fmtTime(event.endTime)}</span>
-        <PlatformChip platform={event.platform} />
+        {nSessions > 1 ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-2 py-0.5 font-semibold text-primary-strong dark:text-primary">
+            {nSessions} sessions
+          </span>
+        ) : (
+          <PlatformChip platform={event.platform} />
+        )}
       </div>
       <div className="mt-4 flex items-center justify-between border-t border-line pt-3.5">
         {trainer ? (

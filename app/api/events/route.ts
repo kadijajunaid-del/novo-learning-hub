@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getDb, saveDb, audit } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
-import { generateMeetingLink } from "@/lib/meetings";
+import { normalizeSessions } from "@/lib/sessions";
+import { syncEventFromSessions } from "@/lib/queries";
 import { uid } from "@/lib/format";
 import type { TrainingEvent } from "@/lib/types";
 
@@ -13,18 +14,30 @@ export async function POST(req: Request) {
   const body = await req.json();
   const db = await getDb();
 
+  const status = body.status === "published" ? "published" : "draft";
+  const title = String(body.title ?? "").trim();
+  if (!title) return NextResponse.json({ error: "Title is required." }, { status: 400 });
+
+  const sessions = normalizeSessions(body.sessions, title, status === "published");
+  if (!sessions) {
+    return NextResponse.json({ error: "Add at least one session with a date, start and end time." }, { status: 400 });
+  }
+
+  // Admins can assign the event to any trainer; trainers own their events.
+  let trainerId = user.id;
+  if (user.role === "admin" && body.trainerId && db.users.some((u) => u.id === body.trainerId && u.role === "trainer")) {
+    trainerId = body.trainerId;
+  }
+
   const event: TrainingEvent = {
     id: uid("ev"),
-    title: String(body.title ?? "").trim(),
+    title,
     description: String(body.description ?? ""),
-    trainerId: user.role === "trainer" ? user.id : (body.trainerId || user.id),
+    trainerId,
     category: body.category || "Onboarding",
-    date: body.date,
-    startTime: body.startTime,
-    endTime: body.endTime,
+    sessions,
+    date: "", startTime: "", endTime: "", platform: "Microsoft Teams", venue: "", meetingLink: "",
     timeZone: body.timeZone || "Europe/Copenhagen",
-    platform: body.platform || "Microsoft Teams",
-    venue: body.platform === "Physical Meeting" ? (body.venue || "TBC") : "Online",
     maxParticipants: Number(body.maxParticipants) || 25,
     materials: Array.isArray(body.materials) ? body.materials : [],
     agenda: Array.isArray(body.agenda) ? body.agenda.filter(Boolean) : [],
@@ -33,18 +46,10 @@ export async function POST(req: Request) {
     reminder: body.reminder || "1 hour",
     repeat: body.repeat || "None",
     visibility: body.visibility || "Everyone",
-    status: body.status === "published" ? "published" : "draft",
-    meetingLink: "",
+    status,
     createdAt: new Date().toISOString(),
   };
-  if (!event.title || !event.date || !event.startTime || !event.endTime) {
-    return NextResponse.json({ error: "Title, date, start and end time are required." }, { status: 400 });
-  }
-
-  // Provision the meeting room at publish time for online platforms.
-  if (event.status === "published" && event.platform !== "Physical Meeting") {
-    event.meetingLink = generateMeetingLink(event.platform, event.title);
-  }
+  syncEventFromSessions(event);
 
   db.events.push(event);
   if (event.status === "published") {
@@ -52,7 +57,7 @@ export async function POST(req: Request) {
       id: uid("nt"),
       to: "trainees",
       title: `New training: ${event.title}`,
-      body: `${user.name} published a new session on ${event.date}. Seats are limited to ${event.maxParticipants} — register now.`,
+      body: `A new programme with ${sessions.length} session${sessions.length === 1 ? "" : "s"} starts on ${event.date}. Seats are limited to ${event.maxParticipants} — register now.`,
       kind: "event",
       at: new Date().toISOString(),
       readBy: [],

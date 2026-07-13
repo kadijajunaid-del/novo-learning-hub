@@ -80,7 +80,7 @@ export default function NotifyMe({
       )}
       {!result && !full && (
         <p className="text-xs leading-relaxed text-ink3">
-          One click registers you, creates the {platform === "Physical Meeting" ? "meeting" : `${platform} meeting`}, emails your confirmation and adds the event — with the link, agenda, trainer, attachments and reminder — to your Outlook Calendar.
+          One click registers you for the whole programme, creates the meetings, emails your confirmation and adds every session — with its link, agenda, trainer and reminder — to your Outlook Calendar.
         </p>
       )}
       {error && <p className="rounded-lg bg-crit/10 px-3 py-2 text-xs font-medium text-crit">{error}</p>}
@@ -92,13 +92,13 @@ export default function NotifyMe({
           </div>
           <ul className="mt-3 space-y-1.5 text-[13px] text-ink2">
             <li>✓ Confirmation email sent to your inbox</li>
-            <li>✓ Outlook calendar invitation downloaded — open it to add the event with agenda, trainer, attachments and reminder</li>
-            {result.meetingLink && <li>✓ {platform} meeting created automatically</li>}
+            <li>✓ Outlook calendar invitation downloaded — it contains one entry per session, each with its meeting link, agenda, trainer and reminder</li>
+            {result.meetingLink && <li>✓ Meetings created automatically for every online session</li>}
           </ul>
           {result.meetingLink && (
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <a href={result.meetingLink} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-strong">
-                <Video size={15} /> Open meeting link
+                <Video size={15} /> Open first session link
               </a>
               <button
                 onClick={() => {

@@ -11,8 +11,8 @@ import NotifyMe from "@/components/notify-me";
 import EventActions from "@/components/event-actions";
 import AttendancePanel from "@/components/attendance-panel";
 import FeedbackForm from "@/components/feedback-form";
-import { regsFor, eventRating } from "@/lib/queries";
-import { fmtDate, fmtTime } from "@/lib/format";
+import { regsFor, eventRating, eventSessions } from "@/lib/queries";
+import { fmtDate, fmtTime, todayISO } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +35,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
     const u = db.users.find((x) => x.id === r.userId);
     return { userId: r.userId, name: u?.name ?? "Unknown", department: u?.department ?? "", attended: r.attended };
   });
+  const sessions = eventSessions(event);
+  const today = todayISO();
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -63,15 +65,55 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
           <div className="space-y-7 lg:col-span-2">
             {/* key facts */}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              <Fact icon={<CalendarDays size={16} />} label="Date" value={fmtDate(event.date)} />
-              <Fact icon={<Clock size={16} />} label="Time" value={`${fmtTime(event.startTime)} – ${fmtTime(event.endTime)}`} />
+              <Fact icon={<CalendarDays size={16} />} label="Starts" value={fmtDate(sessions[0].date)} />
+              <Fact icon={<ListChecks size={16} />} label="Sessions" value={`${sessions.length} session${sessions.length === 1 ? "" : "s"}`} />
               <Fact icon={<Globe2 size={16} />} label="Time zone" value={event.timeZone} />
-              <Fact icon={event.platform === "Physical Meeting" ? <MapPin size={16} /> : <Video size={16} />} label="Platform" value={event.platform} />
-              <Fact icon={<MapPin size={16} />} label="Venue" value={event.venue} />
               <Fact icon={<Users size={16} />} label="Seats" value={`${regs.length} / ${event.maxParticipants}`} />
-              <Fact icon={<BellRing size={16} />} label="Reminder" value={`${event.reminder} before`} />
+              <Fact icon={<BellRing size={16} />} label="Reminder" value={`${event.reminder} before each session`} />
               <Fact icon={<Eye size={16} />} label="Visibility" value={event.visibility} />
             </div>
+
+            {/* sessions */}
+            <section>
+              <SectionHeader title="Sessions" sub="One registration covers the whole programme — every session lands in your Outlook calendar." />
+              <ol className="space-y-2.5">
+                {sessions.map((s, i) => {
+                  const isPast = s.date < today;
+                  const isToday = s.date === today;
+                  return (
+                    <li key={s.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-line p-4">
+                      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-extrabold ${isPast ? "bg-surface2 text-ink3" : "bg-primary-soft text-primary"}`}>
+                        {i + 1}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-ink">
+                          {fmtDate(s.date)}
+                          {isToday && <Badge tone="blue">Today</Badge>}
+                          {isPast && event.status !== "cancelled" && <Badge tone="green">Done</Badge>}
+                        </div>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink2">
+                          <span className="inline-flex items-center gap-1.5"><Clock size={12} className="text-ink3" /> {fmtTime(s.startTime)} – {fmtTime(s.endTime)}</span>
+                          <span className="inline-flex items-center gap-1.5">
+                            {s.platform === "Physical Meeting" ? <MapPin size={12} className="text-serious" /> : <Video size={12} className="text-primary" />}
+                            {s.platform === "Physical Meeting" ? s.venue : s.platform}
+                          </span>
+                        </div>
+                      </div>
+                      {s.meetingLink && (registered || canManage) && (
+                        <a
+                          href={s.meetingLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-strong"
+                        >
+                          <Video size={13} /> Join
+                        </a>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
 
             {event.agenda.length > 0 && (
               <section>
@@ -171,16 +213,6 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                   </div>
                 </div>
                 <a href={`mailto:${trainer.email}`} className="mt-3 block truncate text-xs font-medium text-primary hover:underline">{trainer.email}</a>
-              </Card>
-            )}
-
-            {event.meetingLink && (registered || canManage) && (
-              <Card className="p-5">
-                <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-ink3">Meeting link</div>
-                <a href={event.meetingLink} target="_blank" rel="noreferrer" className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-strong">
-                  <Video size={15} /> Join meeting
-                </a>
-                <p className="mt-2 break-all text-[11px] leading-relaxed text-ink3">{event.meetingLink}</p>
               </Card>
             )}
 
