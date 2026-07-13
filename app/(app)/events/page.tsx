@@ -20,7 +20,9 @@ export default async function EventsPage({
 
   let events = db.events;
   if (user.role === "trainee") events = events.filter((e) => e.status === "published" || e.status === "completed");
-  if (user.role === "trainer") events = events.filter((e) => e.trainerId === user.id);
+  if (user.role === "trainer") {
+    events = events.filter((e) => e.trainerId === user.id || (e.sessions ?? []).some((s) => s.trainerId === user.id));
+  }
 
   const needle = q.trim().toLowerCase();
   if (needle) {
@@ -56,7 +58,7 @@ export default async function EventsPage({
           </h1>
           <p className="mt-1 text-sm text-ink3">{ordered.length} training{ordered.length === 1 ? "" : "s"} {needle && <>matching “{q}”</>}</p>
         </div>
-        {user.role !== "trainee" && (
+        {(user.role === "admin" || (user.role === "trainer" && db.settings.trainersCanManageSessions !== false)) && (
           <Link href="/events/new" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-strong">
             <Plus size={16} /> Create event
           </Link>

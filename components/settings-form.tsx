@@ -91,6 +91,24 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
               ))}
             </div>
           </div>
+          <div className="flex items-start justify-between gap-3 rounded-xl border border-line p-4">
+            <div className="min-w-0">
+              <span className="text-sm font-semibold text-ink">Trainers can create events & sessions</span>
+              <p className="mt-0.5 text-xs leading-relaxed text-ink3">
+                When off, only administrators create events and schedule their sessions. Trainers still deliver sessions and mark attendance.
+              </p>
+            </div>
+            <button
+              role="switch"
+              aria-checked={s.trainersCanManageSessions !== false}
+              aria-label="Toggle trainer session creation"
+              onClick={() => setS({ ...s, trainersCanManageSessions: s.trainersCanManageSessions === false })}
+              className={`relative w-10 shrink-0 rounded-full transition ${s.trainersCanManageSessions !== false ? "bg-primary" : "bg-line"}`}
+              style={{ height: 22 }}
+            >
+              <span className={`absolute top-0.5 h-[18px] w-[18px] rounded-full bg-white shadow transition-all ${s.trainersCanManageSessions !== false ? "left-[20px]" : "left-0.5"}`} />
+            </button>
+          </div>
         </div>
 
         <div className="card space-y-5 p-6">

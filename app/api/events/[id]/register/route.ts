@@ -19,6 +19,14 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   if (!event || event.status !== "published") {
     return NextResponse.json({ error: "This event is not open for registration." }, { status: 400 });
   }
+  // Validity window
+  const today = new Date().toISOString().slice(0, 10);
+  if (event.validFrom && today < event.validFrom) {
+    return NextResponse.json({ error: `Registration opens on ${event.validFrom}.` }, { status: 400 });
+  }
+  if (event.validUntil && today > event.validUntil) {
+    return NextResponse.json({ error: "Registration for this event has closed." }, { status: 400 });
+  }
   if (db.registrations.some((r) => r.eventId === id && r.userId === user.id)) {
     return NextResponse.json({ error: "You are already registered for this training." }, { status: 409 });
   }

@@ -21,19 +21,21 @@ function dt(date: string, time: string): string {
  * calendar entry per session, each with its own meeting link, location,
  * agenda, trainer and reminder alarm.
  */
-export function buildIcs(event: TrainingEvent, trainer: User | undefined, attendee: User): string {
+export function buildIcs(event: TrainingEvent, trainer: User | undefined, attendee: User, users?: User[]): string {
   const minutes = REMINDER_MINUTES[event.reminder] ?? 60;
   const sessions = eventSessions(event);
   const total = sessions.length;
   const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z");
 
   const vevents = sessions.flatMap((s, i) => {
-    const label = total > 1 ? `${event.title} — Session ${i + 1} of ${total}` : event.title;
+    const sessionTrainer = (users ?? []).find((u) => u.id === s.trainerId) ?? trainer;
+    const sessionName = s.name || `Session ${i + 1}`;
+    const label = total > 1 ? `${event.title} — ${sessionName} (${i + 1}/${total})` : event.title;
     const descriptionParts = [
       event.description,
       "",
-      total > 1 ? `Session ${i + 1} of ${total}` : "",
-      trainer ? `Trainer: ${trainer.name} (${trainer.email})` : "",
+      total > 1 ? `${sessionName} — session ${i + 1} of ${total}` : "",
+      sessionTrainer ? `Trainer: ${sessionTrainer.name} (${sessionTrainer.email})` : "",
       s.meetingLink ? `Join: ${s.meetingLink}` : "",
       event.agenda.length ? `Agenda:\n${event.agenda.map((a, n) => `${n + 1}. ${a}`).join("\n")}` : "",
       event.prerequisites && event.prerequisites !== "None" ? `Prerequisites: ${event.prerequisites}` : "",

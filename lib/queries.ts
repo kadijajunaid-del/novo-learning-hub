@@ -7,7 +7,7 @@ export function eventSessions(e: TrainingEvent): EventSession[] {
   if (Array.isArray(e.sessions) && e.sessions.length) {
     return [...e.sessions].sort((a, b) => (a.date === b.date ? (a.startTime < b.startTime ? -1 : 1) : a.date < b.date ? -1 : 1));
   }
-  return [{ id: `${e.id}-s1`, date: e.date, startTime: e.startTime, endTime: e.endTime, platform: e.platform, venue: e.venue, meetingLink: e.meetingLink }];
+  return [{ id: `${e.id}-s1`, name: "Session 1", trainerId: e.trainerId, date: e.date, startTime: e.startTime, endTime: e.endTime, platform: e.platform, venue: e.venue, meetingLink: e.meetingLink }];
 }
 
 /** Mirrors the first session into the event's legacy fields (used by cards,

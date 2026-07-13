@@ -71,6 +71,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
               <Fact icon={<Users size={16} />} label="Seats" value={`${regs.length} / ${event.maxParticipants}`} />
               <Fact icon={<BellRing size={16} />} label="Reminder" value={`${event.reminder} before each session`} />
               <Fact icon={<Eye size={16} />} label="Visibility" value={event.visibility} />
+              {(event.validFrom || event.validUntil) && (
+                <Fact
+                  icon={<ListChecks size={16} />}
+                  label="Registration window"
+                  value={`${event.validFrom ? fmtDate(event.validFrom) : "Open"} → ${event.validUntil ? fmtDate(event.validUntil) : "no end date"}`}
+                />
+              )}
             </div>
 
             {/* sessions */}
@@ -87,15 +94,19 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-ink">
-                          {fmtDate(s.date)}
+                          {s.name || `Session ${i + 1}`}
                           {isToday && <Badge tone="blue">Today</Badge>}
                           {isPast && event.status !== "cancelled" && <Badge tone="green">Done</Badge>}
                         </div>
                         <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink2">
+                          <span className="inline-flex items-center gap-1.5"><CalendarDays size={12} className="text-ink3" /> {fmtDate(s.date)}</span>
                           <span className="inline-flex items-center gap-1.5"><Clock size={12} className="text-ink3" /> {fmtTime(s.startTime)} – {fmtTime(s.endTime)}</span>
                           <span className="inline-flex items-center gap-1.5">
                             {s.platform === "Physical Meeting" ? <MapPin size={12} className="text-serious" /> : <Video size={12} className="text-primary" />}
                             {s.platform === "Physical Meeting" ? s.venue : s.platform}
+                          </span>
+                          <span className="inline-flex items-center gap-1.5 font-medium text-ink3">
+                            {db.users.find((u) => u.id === s.trainerId)?.name ?? trainer?.name ?? "—"}
                           </span>
                         </div>
                       </div>
@@ -172,7 +183,17 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
             {/* actions */}
             <section className="border-t border-line pt-6">
               {user.role === "trainee" && event.status === "published" && (
-                <NotifyMe eventId={event.id} platform={event.platform} registered={registered} full={regs.length >= event.maxParticipants} />
+                (!event.validFrom || today >= event.validFrom) && (!event.validUntil || today <= event.validUntil) ? (
+                  <NotifyMe eventId={event.id} platform={event.platform} registered={registered} full={regs.length >= event.maxParticipants} />
+                ) : registered ? (
+                  <NotifyMe eventId={event.id} platform={event.platform} registered={registered} full={regs.length >= event.maxParticipants} />
+                ) : (
+                  <p className="rounded-xl bg-surface2 px-4 py-3 text-sm font-medium text-ink2">
+                    {event.validFrom && today < event.validFrom
+                      ? `Registration opens on ${fmtDate(event.validFrom)}.`
+                      : "Registration for this training has closed."}
+                  </p>
+                )
               )}
               {user.role === "trainee" && event.status === "completed" && registered && (
                 <div>

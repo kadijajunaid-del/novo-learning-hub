@@ -12,7 +12,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   if (!event) return new Response("Not found", { status: 404 });
 
   const trainer = db.users.find((u) => u.id === event.trainerId);
-  const ics = buildIcs(event, trainer, user);
+  const ics = buildIcs(event, trainer, user, db.users);
   const slug = event.title.replace(/[^a-z0-9]+/gi, "-").slice(0, 40);
 
   return new Response(ics, {

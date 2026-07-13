@@ -47,12 +47,13 @@ export function buildSeed(): DB {
       trainerId: "u_t1", maxParticipants: 30,
       agenda: ["Welcome & introductions", "Our history and purpose", "The Novo Nordisk Way", "Q&A"],
       sessions: [
-        { id: "ss_or1", date: iso(1), startTime: "09:00", endTime: "12:00", platform: "Microsoft Teams", venue: "Online", meetingLink: teams("orientation01") },
-        { id: "ss_or2", date: iso(2), startTime: "09:00", endTime: "12:00", platform: "Microsoft Teams", venue: "Online", meetingLink: teams("orientation02") },
-        { id: "ss_or3", date: iso(3), startTime: "09:00", endTime: "12:00", platform: "Microsoft Teams", venue: "Online", meetingLink: teams("orientation03") },
+        { id: "ss_or1", name: "Welcome & our purpose", trainerId: "u_t1", date: iso(1), startTime: "09:00", endTime: "12:00", platform: "Microsoft Teams", venue: "Online", meetingLink: teams("orientation01") },
+        { id: "ss_or2", name: "The Novo Nordisk Way", trainerId: "u_t2", date: iso(2), startTime: "09:00", endTime: "12:00", platform: "Microsoft Teams", venue: "Online", meetingLink: teams("orientation02") },
+        { id: "ss_or3", name: "Working here — tools & practicalities", trainerId: "u_t3", date: iso(3), startTime: "09:00", endTime: "12:00", platform: "Microsoft Teams", venue: "Online", meetingLink: teams("orientation03") },
       ],
       date: iso(1), startTime: "09:00", endTime: "12:00", platform: "Microsoft Teams", venue: "Online",
       meetingLink: teams("orientation01"),
+      validFrom: "", validUntil: iso(3),
       ...eventBase,
     },
     {
@@ -61,11 +62,12 @@ export function buildSeed(): DB {
       trainerId: "u_t3", maxParticipants: 20,
       agenda: ["Why GxP matters", "Documentation practices", "Data integrity", "Assessment"],
       sessions: [
-        { id: "ss_gx1", date: iso(4), startTime: "10:00", endTime: "13:00", platform: "Physical Meeting", venue: "HQ Training Room 2", meetingLink: "" },
-        { id: "ss_gx2", date: iso(5), startTime: "10:00", endTime: "13:00", platform: "Physical Meeting", venue: "HQ Training Room 2", meetingLink: "" },
+        { id: "ss_gx1", name: "GxP principles", trainerId: "u_t3", date: iso(4), startTime: "10:00", endTime: "13:00", platform: "Physical Meeting", venue: "HQ Training Room 2", meetingLink: "" },
+        { id: "ss_gx2", name: "Data integrity & assessment", trainerId: "u_t3", date: iso(5), startTime: "10:00", endTime: "13:00", platform: "Physical Meeting", venue: "HQ Training Room 2", meetingLink: "" },
       ],
       date: iso(4), startTime: "10:00", endTime: "13:00", platform: "Physical Meeting", venue: "HQ Training Room 2",
       meetingLink: "",
+      validFrom: "", validUntil: iso(5),
       ...eventBase,
     },
     {
@@ -74,13 +76,14 @@ export function buildSeed(): DB {
       trainerId: "u_t2", maxParticipants: 25,
       agenda: ["CRM tour", "Call planning", "Reporting KPIs", "Hands-on practice"],
       sessions: [
-        { id: "ss_cr1", date: iso(7), startTime: "14:00", endTime: "16:00", platform: "Zoom", venue: "Online", meetingLink: zoom("9124857631") },
-        { id: "ss_cr2", date: iso(8), startTime: "14:00", endTime: "16:00", platform: "Zoom", venue: "Online", meetingLink: zoom("9124857632") },
-        { id: "ss_cr3", date: iso(9), startTime: "14:00", endTime: "16:00", platform: "Zoom", venue: "Online", meetingLink: zoom("9124857633") },
-        { id: "ss_cr4", date: iso(10), startTime: "14:00", endTime: "16:00", platform: "Zoom", venue: "Online", meetingLink: zoom("9124857634") },
+        { id: "ss_cr1", name: "CRM tour", trainerId: "u_t2", date: iso(7), startTime: "14:00", endTime: "16:00", platform: "Zoom", venue: "Online", meetingLink: zoom("9124857631") },
+        { id: "ss_cr2", name: "Call planning", trainerId: "u_t2", date: iso(8), startTime: "14:00", endTime: "16:00", platform: "Zoom", venue: "Online", meetingLink: zoom("9124857632") },
+        { id: "ss_cr3", name: "Reporting KPIs", trainerId: "u_t1", date: iso(9), startTime: "14:00", endTime: "16:00", platform: "Zoom", venue: "Online", meetingLink: zoom("9124857633") },
+        { id: "ss_cr4", name: "Hands-on practice", trainerId: "u_t2", date: iso(10), startTime: "14:00", endTime: "16:00", platform: "Zoom", venue: "Online", meetingLink: zoom("9124857634") },
       ],
       date: iso(7), startTime: "14:00", endTime: "16:00", platform: "Zoom", venue: "Online",
       meetingLink: zoom("9124857631"),
+      validFrom: "", validUntil: iso(10),
       ...eventBase,
     },
   ];
@@ -96,6 +99,7 @@ export function buildSeed(): DB {
     settings: {
       orgName: "Novo Nordisk",
       maxTrainers: 10,
+      trainersCanManageSessions: true,
       departments: ["Clinical Operations", "Regulatory Affairs", "Commercial", "Manufacturing", "Quality Assurance", "IT & Digital", "People & Organisation"],
       categories: ["Onboarding", "Compliance & GxP", "Product Knowledge", "Clinical & Medical", "Commercial Excellence", "Digital & IT", "Leadership & Soft Skills", "Health & Safety"],
       batches: ["2026-Q1 New Hires", "2026-Q2 New Hires", "2026-Q3 New Hires"],

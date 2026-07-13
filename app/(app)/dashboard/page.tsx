@@ -165,7 +165,7 @@ function AdminDashboard({ db, user }: { db: DB; user: User }) {
 /* ============================== TRAINER ============================== */
 
 function TrainerDashboard({ db, user }: { db: DB; user: User }) {
-  const mine = db.events.filter((e) => e.trainerId === user.id);
+  const mine = db.events.filter((e) => e.trainerId === user.id || (e.sessions ?? []).some((s) => s.trainerId === user.id));
   const myUpcoming = mine.filter(isUpcoming);
   const myToday = mine.filter(isToday);
   const myCompleted = mine.filter((e) => e.status === "completed");
@@ -187,9 +187,11 @@ function TrainerDashboard({ db, user }: { db: DB; user: User }) {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <SectionHeader title="Today & next up" sub="Your sessions, soonest first" />
-        <Link href="/events/new" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-strong">
-          <Plus size={16} /> Create event
-        </Link>
+        {db.settings.trainersCanManageSessions !== false && (
+          <Link href="/events/new" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-strong">
+            <Plus size={16} /> Create event
+          </Link>
+        )}
       </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {[...myToday, ...myUpcoming.filter((e) => !isToday(e))].slice(0, 6).map((e) => (

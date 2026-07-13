@@ -1,0 +1,47 @@
+
+> novo-learning-hub@1.0.0 dev
+> next dev -p 3040
+
+   ▲ Next.js 15.5.20
+   - Local:        http://localhost:3040
+   - Network:      http://192.168.100.8:3040
+
+ ✓ Starting...
+ ✓ Ready in 4.5s
+ ○ Compiling /login ...
+ ✓ Compiled /login in 5.4s (577 modules)
+ GET /login 200 in 5969ms
+ GET /login 200 in 77ms
+ ○ Compiling /api/auth/login ...
+ ✓ Compiled /api/auth/login in 701ms (583 modules)
+ POST /api/auth/login 200 in 736ms
+ ○ Compiling /events/new ...
+ ✓ Compiled /events/new in 953ms (705 modules)
+ GET /events/new 200 in 1391ms
+ POST /api/auth/login 200 in 46ms
+ ✓ Compiled /api/settings in 215ms (707 modules)
+ PATCH /api/settings 200 in 388ms
+ ✓ Compiled /api/events in 647ms (711 modules)
+ POST /api/events 200 in 518ms
+ ✓ Compiled in 192ms (276 modules)
+ ○ Compiling /events/[id] ...
+ ✓ Compiled /events/[id] in 1245ms (779 modules)
+ GET /events/ev_mrjd7kr5dcpd12 200 in 3292ms
+ POST /api/auth/login 200 in 70ms
+ ✓ Compiled in 211ms (295 modules)
+ ✓ Compiled /api/events/[id]/register in 276ms (781 modules)
+ POST /api/events/ev_mrjd7kr5dcpd12/register 400 in 1503ms
+ POST /api/events/ev_test1/register 200 in 45ms
+ ✓ Compiled in 232ms (295 modules)
+ ✓ Compiled /api/events/[id]/ics in 343ms (784 modules)
+ GET /api/events/ev_test1/ics 200 in 1462ms
+ POST /api/auth/login 200 in 52ms
+ ✓ Compiled in 211ms (295 modules)
+ ○ Compiling /settings ...
+ ✓ Compiled /settings in 606ms (798 modules)
+ GET /settings 200 in 1225ms
+ POST /api/auth/login 200 in 46ms
+ ✓ Compiled in 159ms (303 modules)
+ ✓ Compiled /events in 473ms (808 modules)
+ GET /events 200 in 994ms
+ ✓ Compiled in 209ms (304 modules)

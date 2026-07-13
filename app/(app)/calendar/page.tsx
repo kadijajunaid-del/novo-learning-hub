@@ -11,23 +11,34 @@ export default async function CalendarPage() {
 
   let events = db.events;
   if (user.role === "trainee") events = events.filter((e) => e.status !== "draft");
-  if (user.role === "trainer") events = events.filter((e) => e.trainerId === user.id);
+  if (user.role === "trainer") {
+    // Events they own, plus programmes where they deliver at least one session.
+    events = events.filter((e) => e.trainerId === user.id || (e.sessions ?? []).some((s) => s.trainerId === user.id));
+  }
 
   // One calendar entry per session, labelled "Sn/N" for multi-session programmes.
   const payload: CalEvent[] = events.flatMap((e) => {
-    const sessions = eventSessions(e);
-    return sessions.map((s, i) => ({
-      id: e.id,
-      title: sessions.length > 1 ? `${e.title} (S${i + 1}/${sessions.length})` : e.title,
-      date: s.date,
-      startTime: s.startTime,
-      endTime: s.endTime,
-      status: e.status,
-      platform: s.platform,
-      venue: s.venue,
-      trainer: db.users.find((u) => u.id === e.trainerId)?.name ?? "",
-      description: e.description,
-    }));
+    let sessions = eventSessions(e);
+    // A session trainer sees their own sessions (plus all of them if they own the event).
+    if (user.role === "trainer" && e.trainerId !== user.id) {
+      sessions = sessions.filter((s) => s.trainerId === user.id);
+    }
+    const total = eventSessions(e).length;
+    return sessions.map((s) => {
+      const idx = eventSessions(e).findIndex((x) => x.id === s.id);
+      return {
+        id: e.id,
+        title: total > 1 ? `${e.title} (S${idx + 1}/${total})` : e.title,
+        date: s.date,
+        startTime: s.startTime,
+        endTime: s.endTime,
+        status: e.status,
+        platform: s.platform,
+        venue: s.venue,
+        trainer: db.users.find((u) => u.id === (s.trainerId || e.trainerId))?.name ?? "",
+        description: `${s.name ? `${s.name} — ` : ""}${e.description}`,
+      };
+    });
   });
 
   return (

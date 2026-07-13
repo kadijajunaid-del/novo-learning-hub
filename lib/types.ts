@@ -23,6 +23,8 @@ export type Platform =
 
 export interface EventSession {
   id: string;
+  name: string; // editable label, e.g. "Kick-off" (defaults to "Session n")
+  trainerId: string; // each session can have its own trainer
   date: string; // YYYY-MM-DD
   startTime: string; // HH:mm
   endTime: string; // HH:mm
@@ -54,6 +56,9 @@ export interface TrainingEvent {
   reminder: string; // "15 mins" | "30 mins" | "1 hour" | "1 day"
   repeat: string; // "None" | "Daily" | "Weekly" | "Monthly" | "Custom"
   visibility: string; // "Everyone" | "Specific Batch" | "Specific Department" | "Specific Team"
+  /** Registration window. Empty string = no restriction. */
+  validFrom: string; // YYYY-MM-DD
+  validUntil: string; // YYYY-MM-DD
   status: EventStatus;
   meetingLink: string;
   createdAt: string;
@@ -110,6 +115,8 @@ export interface IntegrationConfig {
 export interface Settings {
   orgName: string;
   maxTrainers: number;
+  /** When false, only administrators can create events and their sessions. */
+  trainersCanManageSessions: boolean;
   departments: string[];
   categories: string[];
   batches: string[];

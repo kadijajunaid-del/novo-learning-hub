@@ -13,6 +13,8 @@ const labelCls = "mb-1.5 block text-xs font-semibold text-ink2";
 
 type SessionDraft = {
   id?: string;
+  name: string;
+  trainerId: string;
   date: string;
   startTime: string;
   endTime: string;
@@ -21,7 +23,7 @@ type SessionDraft = {
   meetingLink?: string;
 };
 
-const emptySession = (): SessionDraft => ({ date: "", startTime: "09:00", endTime: "11:00", platform: "Microsoft Teams", venue: "" });
+const emptySession = (): SessionDraft => ({ name: "", trainerId: "", date: "", startTime: "09:00", endTime: "11:00", platform: "Microsoft Teams", venue: "" });
 
 export default function EventForm({
   categories,
@@ -58,13 +60,15 @@ export default function EventForm({
     reminder: existing?.reminder ?? "1 hour",
     repeat: existing?.repeat ?? "None",
     visibility: existing?.visibility ?? "Everyone",
+    validFrom: existing?.validFrom ?? "",
+    validUntil: existing?.validUntil ?? "",
     trainerId: existing?.trainerId ?? trainers?.[0]?.id ?? "",
   });
   const [sessions, setSessions] = useState<SessionDraft[]>(
     existing
       ? (existing.sessions?.length
-          ? existing.sessions.map((s) => ({ ...s }))
-          : [{ date: existing.date, startTime: existing.startTime, endTime: existing.endTime, platform: existing.platform, venue: existing.venue === "Online" ? "" : existing.venue, meetingLink: existing.meetingLink }])
+          ? existing.sessions.map((s) => ({ name: "", trainerId: "", ...s }))
+          : [{ name: "", trainerId: existing.trainerId, date: existing.date, startTime: existing.startTime, endTime: existing.endTime, platform: existing.platform, venue: existing.venue === "Online" ? "" : existing.venue, meetingLink: existing.meetingLink }])
       : [emptySession()],
   );
   const [materials, setMaterials] = useState<{ name: string; size: string }[]>(existing?.materials ?? []);
@@ -83,7 +87,7 @@ export default function EventForm({
         d.setDate(d.getDate() + 1);
         nextDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
       }
-      return [...prev, { ...emptySession(), date: nextDate, startTime: last?.startTime ?? "09:00", endTime: last?.endTime ?? "11:00", platform: last?.platform ?? "Microsoft Teams", venue: last?.venue ?? "" }];
+      return [...prev, { ...emptySession(), date: nextDate, startTime: last?.startTime ?? "09:00", endTime: last?.endTime ?? "11:00", platform: last?.platform ?? "Microsoft Teams", venue: last?.venue ?? "", trainerId: last?.trainerId ?? "" }];
     });
 
   const removeSession = (i: number) => setSessions((prev) => prev.filter((_, n) => n !== i));
@@ -186,6 +190,20 @@ export default function EventForm({
                       </button>
                     )}
                   </div>
+                  <div className="mb-3 grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <label className={labelCls}>Session name</label>
+                      <input className={inputCls} value={s.name} onChange={setSession(i, "name")} placeholder={`Session ${i + 1}`} />
+                    </div>
+                    {trainers?.length ? (
+                      <div>
+                        <label className={labelCls}>Session trainer</label>
+                        <select className={inputCls} value={s.trainerId || f.trainerId} onChange={setSession(i, "trainerId")}>
+                          {trainers.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                        </select>
+                      </div>
+                    ) : null}
+                  </div>
                   <div className="grid gap-3 sm:grid-cols-4">
                     <div>
                       <label className={labelCls}>Date *</label>
@@ -239,6 +257,14 @@ export default function EventForm({
           <select className={inputCls} value={f.repeat} onChange={set("repeat")}>
             {["None", "Daily", "Weekly", "Monthly", "Custom"].map((r) => <option key={r}>{r}</option>)}
           </select>
+        </div>
+        <div>
+          <label className={labelCls}>Registration valid from <span className="font-normal text-ink3">(optional)</span></label>
+          <input type="date" className={inputCls} value={f.validFrom} onChange={set("validFrom")} />
+        </div>
+        <div>
+          <label className={labelCls}>Registration valid until <span className="font-normal text-ink3">(optional)</span></label>
+          <input type="date" className={inputCls} value={f.validUntil} onChange={set("validUntil")} />
         </div>
         <div className="sm:col-span-2">
           <label className={labelCls}>Visibility</label>

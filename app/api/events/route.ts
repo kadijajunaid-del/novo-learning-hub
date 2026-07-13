@@ -14,19 +14,25 @@ export async function POST(req: Request) {
   const body = await req.json();
   const db = await getDb();
 
+  if (user.role === "trainer" && db.settings.trainersCanManageSessions === false) {
+    return NextResponse.json({ error: "The administrator currently manages events and sessions. Please contact L&D to schedule your training." }, { status: 403 });
+  }
+
   const status = body.status === "published" ? "published" : "draft";
   const title = String(body.title ?? "").trim();
   if (!title) return NextResponse.json({ error: "Title is required." }, { status: 400 });
 
-  const sessions = normalizeSessions(body.sessions, title, status === "published");
+  // Admins can assign the event (and each session) to any trainer.
+  const trainerIds = new Set(db.users.filter((u) => u.role === "trainer").map((u) => u.id));
+  let trainerId = user.id;
+  if (user.role === "admin" && body.trainerId && trainerIds.has(body.trainerId)) {
+    trainerId = body.trainerId;
+  }
+  const allowedSessionTrainers = user.role === "admin" ? trainerIds : new Set([user.id]);
+
+  const sessions = normalizeSessions(body.sessions, title, status === "published", trainerId, allowedSessionTrainers);
   if (!sessions) {
     return NextResponse.json({ error: "Add at least one session with a date, start and end time." }, { status: 400 });
-  }
-
-  // Admins can assign the event to any trainer; trainers own their events.
-  let trainerId = user.id;
-  if (user.role === "admin" && body.trainerId && db.users.some((u) => u.id === body.trainerId && u.role === "trainer")) {
-    trainerId = body.trainerId;
   }
 
   const event: TrainingEvent = {
@@ -46,6 +52,8 @@ export async function POST(req: Request) {
     reminder: body.reminder || "1 hour",
     repeat: body.repeat || "None",
     visibility: body.visibility || "Everyone",
+    validFrom: typeof body.validFrom === "string" ? body.validFrom : "",
+    validUntil: typeof body.validUntil === "string" ? body.validUntil : "",
     status,
     createdAt: new Date().toISOString(),
   };

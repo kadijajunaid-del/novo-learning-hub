@@ -10,6 +10,7 @@ export async function PATCH(req: Request) {
   const body = await req.json();
 
   if (typeof body.maxTrainers === "number") db.settings.maxTrainers = Math.max(1, body.maxTrainers);
+  if (typeof body.trainersCanManageSessions === "boolean") db.settings.trainersCanManageSessions = body.trainersCanManageSessions;
   if (Array.isArray(body.departments)) db.settings.departments = body.departments.filter(Boolean);
   if (Array.isArray(body.categories)) db.settings.categories = body.categories.filter(Boolean);
   if (Array.isArray(body.batches)) db.settings.batches = body.batches.filter(Boolean);

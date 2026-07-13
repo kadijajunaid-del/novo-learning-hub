@@ -64,13 +64,21 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ ok: true, id: copy.id });
   } else {
     // Field edit
-    const editable = ["title", "description", "category", "timeZone", "maxParticipants", "materials", "agenda", "prerequisites", "instructions", "reminder", "repeat", "visibility", "status", "trainerId"];
+    const editable = ["title", "description", "category", "timeZone", "maxParticipants", "materials", "agenda", "prerequisites", "instructions", "reminder", "repeat", "visibility", "validFrom", "validUntil", "status"];
     for (const k of editable) {
       if (k in body) (event as any)[k] = body[k];
     }
     event.maxParticipants = Number(event.maxParticipants) || 25;
+    const trainerIds = new Set(db.users.filter((u) => u.role === "trainer").map((u) => u.id));
+    if (user.role === "admin" && body.trainerId && trainerIds.has(body.trainerId)) {
+      event.trainerId = body.trainerId;
+    }
     if ("sessions" in body) {
-      const sessions = normalizeSessions(body.sessions, event.title, event.status === "published");
+      if (user.role === "trainer" && db.settings.trainersCanManageSessions === false) {
+        return NextResponse.json({ error: "The administrator currently manages sessions. Please contact L&D to change the schedule." }, { status: 403 });
+      }
+      const allowedSessionTrainers = user.role === "admin" ? trainerIds : new Set([user.id]);
+      const sessions = normalizeSessions(body.sessions, event.title, event.status === "published", event.trainerId, allowedSessionTrainers);
       if (!sessions) {
         return NextResponse.json({ error: "Add at least one session with a date, start and end time." }, { status: 400 });
       }

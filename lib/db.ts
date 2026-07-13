@@ -37,6 +37,11 @@ function ensureGenericAccounts(db: DB): boolean {
       changed = true;
     }
   }
+  // Default settings added after a database was first created.
+  if (typeof db.settings.trainersCanManageSessions === "undefined") {
+    db.settings.trainersCanManageSessions = true;
+    changed = true;
+  }
   return changed;
 }
 
