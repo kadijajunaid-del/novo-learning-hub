@@ -13,6 +13,7 @@ export function normalizeSessions(
   published: boolean,
   defaultTrainerId: string,
   allowedTrainerIds: Set<string>,
+  defaultCategory = "Onboarding",
 ): EventSession[] | null {
   if (!Array.isArray(raw) || !raw.length) return null;
   const sessions: EventSession[] = [];
@@ -30,6 +31,7 @@ export function normalizeSessions(
       id: s.id && String(s.id).startsWith("ss_") ? s.id : uid("ss"),
       name: String(s.name ?? "").trim() || `Session ${i}`,
       trainerId,
+      category: String(s.category ?? "").trim() || defaultCategory,
       date: s.date,
       startTime: s.startTime,
       endTime: s.endTime,

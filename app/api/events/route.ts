@@ -30,7 +30,7 @@ export async function POST(req: Request) {
   }
   const allowedSessionTrainers = user.role === "admin" ? trainerIds : new Set([user.id]);
 
-  const sessions = normalizeSessions(body.sessions, title, status === "published", trainerId, allowedSessionTrainers);
+  const sessions = normalizeSessions(body.sessions, title, status === "published", trainerId, allowedSessionTrainers, body.category || db.settings.categories[0]);
   if (!sessions) {
     return NextResponse.json({ error: "Add at least one session with a date, start and end time." }, { status: 400 });
   }

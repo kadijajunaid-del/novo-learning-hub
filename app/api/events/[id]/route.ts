@@ -78,7 +78,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         return NextResponse.json({ error: "The administrator currently manages sessions. Please contact L&D to change the schedule." }, { status: 403 });
       }
       const allowedSessionTrainers = user.role === "admin" ? trainerIds : new Set([user.id]);
-      const sessions = normalizeSessions(body.sessions, event.title, event.status === "published", event.trainerId, allowedSessionTrainers);
+      const sessions = normalizeSessions(body.sessions, event.title, event.status === "published", event.trainerId, allowedSessionTrainers, event.category || db.settings.categories[0]);
       if (!sessions) {
         return NextResponse.json({ error: "Add at least one session with a date, start and end time." }, { status: 400 });
       }

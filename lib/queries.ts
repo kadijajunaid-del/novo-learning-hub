@@ -7,7 +7,7 @@ export function eventSessions(e: TrainingEvent): EventSession[] {
   if (Array.isArray(e.sessions) && e.sessions.length) {
     return [...e.sessions].sort((a, b) => (a.date === b.date ? (a.startTime < b.startTime ? -1 : 1) : a.date < b.date ? -1 : 1));
   }
-  return [{ id: `${e.id}-s1`, name: "Session 1", trainerId: e.trainerId, date: e.date, startTime: e.startTime, endTime: e.endTime, platform: e.platform, venue: e.venue, meetingLink: e.meetingLink }];
+  return [{ id: `${e.id}-s1`, name: "Session 1", trainerId: e.trainerId, category: e.category, date: e.date, startTime: e.startTime, endTime: e.endTime, platform: e.platform, venue: e.venue, meetingLink: e.meetingLink }];
 }
 
 /** Mirrors the first session into the event's legacy fields (used by cards,
@@ -22,6 +22,9 @@ export function syncEventFromSessions(e: TrainingEvent): void {
   e.platform = first.platform;
   e.venue = first.venue;
   e.meetingLink = first.meetingLink;
+  // The event's headline trainer and category mirror the first session.
+  if (first.trainerId) e.trainerId = first.trainerId;
+  if (first.category) e.category = first.category;
 }
 
 export function notificationsFor(db: DB, user: User): Notification[] {

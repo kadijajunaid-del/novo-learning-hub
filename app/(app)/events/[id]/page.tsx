@@ -108,6 +108,11 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                           <span className="inline-flex items-center gap-1.5 font-medium text-ink3">
                             {db.users.find((u) => u.id === s.trainerId)?.name ?? trainer?.name ?? "—"}
                           </span>
+                          {s.category && (
+                            <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-semibold text-primary-strong dark:text-primary">
+                              {s.category}
+                            </span>
+                          )}
                         </div>
                       </div>
                       {s.meetingLink && (registered || canManage) && (

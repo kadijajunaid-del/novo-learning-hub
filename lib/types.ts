@@ -25,6 +25,7 @@ export interface EventSession {
   id: string;
   name: string; // editable label, e.g. "Kick-off" (defaults to "Session n")
   trainerId: string; // each session can have its own trainer
+  category: string; // each session can have its own training category
   date: string; // YYYY-MM-DD
   startTime: string; // HH:mm
   endTime: string; // HH:mm
