@@ -13,6 +13,7 @@ import AttendancePanel from "@/components/attendance-panel";
 import FeedbackForm from "@/components/feedback-form";
 import { regsFor, eventRating, eventSessions, visibleToTrainee } from "@/lib/queries";
 import SessionIcs from "@/components/session-ics";
+import AddSession from "@/components/add-session";
 import { fmtDate, fmtTime, todayISO } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +30,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
   const trainer = db.users.find((u) => u.id === event.trainerId);
   const regs = regsFor(db, event.id);
   const registered = regs.some((r) => r.userId === user.id);
+  const isAssignedTrainer = user.role === "trainer" && (event.assignedTrainerIds ?? []).includes(user.id);
   const canManage = user.role === "admin" || (user.role === "trainer" && event.trainerId === user.id);
+  // Owner, admin, or an assigned trainer (when the event allows it) may add sessions.
+  const canAddSession =
+    (canManage || (isAssignedTrainer && event.allowTrainerSessions)) &&
+    event.status !== "cancelled" &&
+    (user.role === "admin" || db.settings.trainersCanManageSessions !== false);
   const st = statusTone(event.status, event.date);
   const rating = eventRating(db, event.id);
   const myFeedback = db.feedback.find((f) => f.eventId === event.id && f.userId === user.id);
@@ -118,7 +125,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {s.meetingLink && (registered || canManage) && (
+                        {s.meetingLink && (registered || canManage || isAssignedTrainer) && (
                           <a
                             href={s.meetingLink}
                             target="_blank"
@@ -128,14 +135,31 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                             <Video size={13} /> Join
                           </a>
                         )}
-                        {(registered || canManage) && event.status === "published" && (
+                        {(registered || canManage || isAssignedTrainer) && event.status === "published" && (
                           <SessionIcs eventId={event.id} sessionId={s.id} />
                         )}
                       </div>
                     </li>
                   );
                 })}
+                {!sessions.length && (
+                  <li className="rounded-xl border border-dashed border-line p-6 text-center text-sm text-ink3">
+                    No sessions scheduled yet.{canAddSession ? " Use “Add session” to schedule one." : ""}
+                  </li>
+                )}
               </ol>
+              {canAddSession && (
+                <div className="mt-3">
+                  <AddSession
+                    eventId={event.id}
+                    platforms={db.settings.platforms}
+                    categories={db.settings.categories}
+                    defaultCategory={event.category}
+                    nextIndex={sessions.length + 1}
+                    trainers={user.role === "admin" ? db.users.filter((u) => u.role === "trainer" && u.active).map((t) => ({ id: t.id, name: t.name })) : undefined}
+                  />
+                </div>
+              )}
             </section>
 
             {event.agenda.length > 0 && (

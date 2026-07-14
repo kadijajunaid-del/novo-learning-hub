@@ -62,6 +62,9 @@ export interface TrainingEvent {
   /** Registration window. Empty string = no restriction. */
   validFrom: string; // YYYY-MM-DD
   validUntil: string; // YYYY-MM-DD
+  /** When true, the trainers in assignedTrainerIds may add sessions to this event. */
+  allowTrainerSessions?: boolean;
+  assignedTrainerIds?: string[];
   status: EventStatus;
   meetingLink: string;
   createdAt: string;

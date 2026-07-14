@@ -30,9 +30,16 @@ export async function POST(req: Request) {
   }
   const allowedSessionTrainers = user.role === "admin" ? trainerIds : new Set([user.id]);
 
+  // Collaborative events: admin lets assigned trainers add sessions later.
+  const allowTrainerSessions = user.role === "admin" && Boolean(body.allowTrainerSessions);
+  const assignedTrainerIds = allowTrainerSessions && Array.isArray(body.assignedTrainerIds)
+    ? body.assignedTrainerIds.filter((tid: string) => trainerIds.has(tid))
+    : [];
+
   const sessions = normalizeSessions(body.sessions, title, status === "published", trainerId, allowedSessionTrainers, body.category || db.settings.categories[0]);
-  if (!sessions) {
-    return NextResponse.json({ error: "Add at least one session with a date, start and end time." }, { status: 400 });
+  // Sessions are required unless assigned trainers will add them.
+  if (!sessions && !(allowTrainerSessions && assignedTrainerIds.length)) {
+    return NextResponse.json({ error: "Add at least one session with a date, start and end time — or enable trainer sessions and assign trainers." }, { status: 400 });
   }
 
   const event: TrainingEvent = {
@@ -41,7 +48,7 @@ export async function POST(req: Request) {
     description: String(body.description ?? ""),
     trainerId,
     category: body.category || "Onboarding",
-    sessions,
+    sessions: sessions ?? [],
     date: "", startTime: "", endTime: "", platform: "Microsoft Teams", venue: "", meetingLink: "",
     timeZone: body.timeZone || "Europe/Copenhagen",
     maxParticipants: Number(body.maxParticipants) || 25,
@@ -54,18 +61,32 @@ export async function POST(req: Request) {
     visibility: body.visibility || "Everyone",
     validFrom: typeof body.validFrom === "string" ? body.validFrom : "",
     validUntil: typeof body.validUntil === "string" ? body.validUntil : "",
+    allowTrainerSessions,
+    assignedTrainerIds,
     status,
     createdAt: new Date().toISOString(),
   };
   syncEventFromSessions(event);
 
   db.events.push(event);
-  if (event.status === "published") {
+  if (event.status === "published" && event.sessions.length) {
     db.notifications.unshift({
       id: uid("nt"),
       to: "trainees",
       title: `New training: ${event.title}`,
-      body: `A new programme with ${sessions.length} session${sessions.length === 1 ? "" : "s"} starts on ${event.date}. Seats are limited to ${event.maxParticipants} — register now.`,
+      body: `A new programme with ${event.sessions.length} session${event.sessions.length === 1 ? "" : "s"} starts on ${event.date}. Seats are limited to ${event.maxParticipants} — register now.`,
+      kind: "event",
+      at: new Date().toISOString(),
+      readBy: [],
+    });
+  }
+  // Let assigned trainers know they can add their sessions.
+  for (const tid of assignedTrainerIds) {
+    db.notifications.unshift({
+      id: uid("nt"),
+      to: tid,
+      title: `You're assigned to: ${event.title}`,
+      body: `${user.name} assigned you to this programme. Open it from My Events and use "Add session" to schedule your sessions.`,
       kind: "event",
       at: new Date().toISOString(),
       readBy: [],

@@ -10,7 +10,7 @@ import { EventCard } from "@/components/event-card";
 import { BarChart, LineChart, DonutChart, HBarChart } from "@/components/charts";
 import {
   notificationsFor, regsFor, trainerRating, attendancePct, isUpcoming, isToday,
-  trainingsPerMonth, attendanceTrend, categoryCounts, mostActiveTrainers, visibleToTrainee,
+  trainingsPerMonth, attendanceTrend, categoryCounts, mostActiveTrainers, visibleToTrainee, trainerCanSee,
 } from "@/lib/queries";
 import { fmtDate, fmtDateShort, fmtTime, relTime, todayISO } from "@/lib/format";
 import type { DB, User } from "@/lib/types";
@@ -165,7 +165,7 @@ function AdminDashboard({ db, user }: { db: DB; user: User }) {
 /* ============================== TRAINER ============================== */
 
 function TrainerDashboard({ db, user }: { db: DB; user: User }) {
-  const mine = db.events.filter((e) => e.trainerId === user.id || (e.sessions ?? []).some((s) => s.trainerId === user.id));
+  const mine = db.events.filter((e) => trainerCanSee(e, user.id));
   const myUpcoming = mine.filter(isUpcoming);
   const myToday = mine.filter(isToday);
   const myCompleted = mine.filter((e) => e.status === "completed");

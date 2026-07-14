@@ -73,16 +73,23 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (user.role === "admin" && body.trainerId && trainerIds.has(body.trainerId)) {
       event.trainerId = body.trainerId;
     }
+    if (user.role === "admin") {
+      if (typeof body.allowTrainerSessions === "boolean") event.allowTrainerSessions = body.allowTrainerSessions;
+      if (Array.isArray(body.assignedTrainerIds)) {
+        event.assignedTrainerIds = body.assignedTrainerIds.filter((tid: string) => trainerIds.has(tid));
+      }
+    }
     if ("sessions" in body) {
       if (user.role === "trainer" && db.settings.trainersCanManageSessions === false) {
         return NextResponse.json({ error: "The administrator currently manages sessions. Please contact L&D to change the schedule." }, { status: 403 });
       }
       const allowedSessionTrainers = user.role === "admin" ? trainerIds : new Set([user.id]);
       const sessions = normalizeSessions(body.sessions, event.title, event.status === "published", event.trainerId, allowedSessionTrainers, event.category || db.settings.categories[0]);
-      if (!sessions) {
+      const canBeEmpty = user.role === "admin" && event.allowTrainerSessions && (event.assignedTrainerIds ?? []).length;
+      if (!sessions && !canBeEmpty) {
         return NextResponse.json({ error: "Add at least one session with a date, start and end time." }, { status: 400 });
       }
-      event.sessions = sessions;
+      event.sessions = sessions ?? [];
     }
     syncEventFromSessions(event);
     audit(db, user.name, "event.updated", event.title);

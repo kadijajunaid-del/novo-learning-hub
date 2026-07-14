@@ -1,6 +1,6 @@
 import { getDb } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
-import { eventSessions, visibleToTrainee } from "@/lib/queries";
+import { eventSessions, visibleToTrainee, trainerCanSee } from "@/lib/queries";
 import MonthCalendar, { type CalEvent } from "@/components/month-calendar";
 
 export const dynamic = "force-dynamic";
@@ -12,15 +12,16 @@ export default async function CalendarPage() {
   let events = db.events;
   if (user.role === "trainee") events = events.filter((e) => e.status !== "draft" && visibleToTrainee(e, user));
   if (user.role === "trainer") {
-    // Events they own, plus programmes where they deliver at least one session.
-    events = events.filter((e) => e.trainerId === user.id || (e.sessions ?? []).some((s) => s.trainerId === user.id));
+    events = events.filter((e) => trainerCanSee(e, user.id));
   }
 
   // One calendar entry per session, labelled "Sn/N" for multi-session programmes.
   const payload: CalEvent[] = events.flatMap((e) => {
     let sessions = eventSessions(e);
-    // A session trainer sees their own sessions (plus all of them if they own the event).
-    if (user.role === "trainer" && e.trainerId !== user.id) {
+    // Owners and assigned trainers see all sessions; a lone session-trainer
+    // (only delivering one session) sees just their own.
+    const seesAll = e.trainerId === user.id || (e.assignedTrainerIds ?? []).includes(user.id);
+    if (user.role === "trainer" && !seesAll) {
       sessions = sessions.filter((s) => s.trainerId === user.id);
     }
     const total = eventSessions(e).length;

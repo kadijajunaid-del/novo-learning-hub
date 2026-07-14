@@ -61,6 +61,10 @@ export default function EventForm({
     validFrom: existing?.validFrom ?? "",
     validUntil: existing?.validUntil ?? "",
   });
+  const [allowTrainerSessions, setAllowTrainerSessions] = useState(existing?.allowTrainerSessions ?? false);
+  const [assignedTrainerIds, setAssignedTrainerIds] = useState<string[]>(existing?.assignedTrainerIds ?? []);
+  const toggleAssigned = (id: string) =>
+    setAssignedTrainerIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   const emptySession = (): SessionDraft => ({
     name: "",
     trainerId: trainers?.[0]?.id ?? "",
@@ -108,6 +112,8 @@ export default function EventForm({
       agenda: f.agenda.split("\n").map((s) => s.trim()).filter(Boolean),
       materials,
       sessions,
+      allowTrainerSessions,
+      assignedTrainerIds,
       status,
     };
     const res = await fetch(existing ? `/api/events/${existing.id}` : "/api/events", {
@@ -158,11 +164,56 @@ export default function EventForm({
           <input type="number" min={1} className={inputCls} value={f.maxParticipants} onChange={set("maxParticipants")} />
         </div>
 
+        {/* ---------- collaborative sessions (admin only) ---------- */}
+        {trainers?.length ? (
+          <div className="sm:col-span-2 rounded-xl border border-line bg-surface2/40 p-4">
+            <label className="flex cursor-pointer items-start gap-3">
+              <input
+                type="checkbox"
+                checked={allowTrainerSessions}
+                onChange={(e) => setAllowTrainerSessions(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--primary)]"
+              />
+              <span className="min-w-0">
+                <span className="text-sm font-semibold text-ink">Allow trainers to add sessions</span>
+                <span className="mt-0.5 block text-xs leading-relaxed text-ink3">
+                  Assigned trainers get this event on their screen with an "Add session" button and can schedule their own sessions. You can also add sessions below yourself.
+                </span>
+              </span>
+            </label>
+            {allowTrainerSessions && (
+              <div className="mt-3">
+                <label className="mb-1.5 block text-xs font-semibold text-ink2">Assigned trainers</label>
+                <div className="flex flex-wrap gap-2">
+                  {trainers.map((t) => {
+                    const on = assignedTrainerIds.includes(t.id);
+                    return (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => toggleAssigned(t.id)}
+                        className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                          on ? "border-primary bg-primary text-white" : "border-line text-ink2 hover:bg-surface2"
+                        }`}
+                      >
+                        {on ? "✓ " : ""}{t.name}
+                      </button>
+                    );
+                  })}
+                </div>
+                {!assignedTrainerIds.length && (
+                  <p className="mt-2 text-[11px] font-medium text-serious">Select at least one trainer.</p>
+                )}
+              </div>
+            )}
+          </div>
+        ) : null}
+
         {/* ---------- sessions ---------- */}
         <div className="sm:col-span-2">
           <div className="mb-2 flex items-center justify-between">
             <label className="text-xs font-semibold text-ink2">
-              Sessions * <span className="font-normal text-ink3">— each session is its own meeting with its own link</span>
+              Sessions {allowTrainerSessions && assignedTrainerIds.length ? "" : "*"} <span className="font-normal text-ink3">— each session is its own meeting with its own link{allowTrainerSessions && assignedTrainerIds.length ? "; assigned trainers can add more" : ""}</span>
             </label>
             <span className="text-xs font-semibold text-ink3">{sessions.length} session{sessions.length === 1 ? "" : "s"}</span>
           </div>
@@ -175,7 +226,7 @@ export default function EventForm({
                     <span className="inline-flex items-center gap-2 text-sm font-bold text-ink">
                       <CalendarDays size={14} className="text-primary" /> Session {i + 1}
                     </span>
-                    {sessions.length > 1 && (
+                    {(sessions.length > 1 || (allowTrainerSessions && assignedTrainerIds.length > 0)) && (
                       <button type="button" aria-label={`Remove session ${i + 1}`} onClick={() => removeSession(i)} className="text-ink3 transition hover:text-crit">
                         <Trash2 size={15} />
                       </button>

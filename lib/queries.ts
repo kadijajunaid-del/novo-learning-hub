@@ -60,6 +60,15 @@ export function attendancePct(db: DB, eventIds?: string[]): number | null {
   return Math.round((regs.filter((r) => r.attended).length / regs.length) * 100);
 }
 
+/** A trainer sees events they own, deliver a session of, or are assigned to. */
+export function trainerCanSee(e: TrainingEvent, trainerId: string): boolean {
+  return (
+    e.trainerId === trainerId ||
+    (e.sessions ?? []).some((s) => s.trainerId === trainerId) ||
+    (e.assignedTrainerIds ?? []).includes(trainerId)
+  );
+}
+
 /** Batch/department visibility: trainees only see events aimed at everyone,
  *  their batch, or their department. Trainers and admins see everything. */
 export function visibleToTrainee(e: TrainingEvent, user: User): boolean {

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getDb } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import TraineeManager, { type TraineeRow } from "@/components/trainee-manager";
+import { trainerCanSee } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,7 @@ export default async function TraineesPage({
   const hasFilters = Boolean(q || department || batch || from || to);
 
   // Trainers see the people registered for their sessions; admin sees everyone.
-  const myEventIds = user.role === "trainer" ? db.events.filter((e) => e.trainerId === user.id || (e.sessions ?? []).some((s) => s.trainerId === user.id)).map((e) => e.id) : null;
+  const myEventIds = user.role === "trainer" ? db.events.filter((e) => trainerCanSee(e, user.id)).map((e) => e.id) : null;
   const needle = q.trim().toLowerCase();
   const trainees = db.users.filter((u) => {
     if (u.role !== "trainee") return false;
