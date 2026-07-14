@@ -13,15 +13,15 @@ export function buildSeed(): DB {
   const users: User[] = [
     { id: "u_admin", name: "Administrator", email: "admin@novonordisk.com", password: "Admin@123", role: "admin", department: "People & Organisation", title: "L&D Administrator", active: true, joined },
     { id: "u_trainer", name: "Demo Trainer", email: "trainer@novonordisk.com", password: "Trainer@123", role: "trainer", department: "People & Organisation", title: "Trainer", active: true, joined },
-    { id: "u_trainee", name: "Demo Trainee", email: "trainee@novonordisk.com", password: "Trainee@123", role: "trainee", department: "People & Organisation", title: "New Hire", active: true, joined },
+    { id: "u_trainee", name: "Demo Trainee", email: "trainee@novonordisk.com", password: "Trainee@123", role: "trainee", department: "People & Organisation", title: "New Hire", batch: "2026-Q3 New Hires", active: true, joined },
     // Test trainers
     { id: "u_t1", name: "Sarah Ahmed", email: "sarah.ahmed@novonordisk.com", password: "Trainer@123", role: "trainer", department: "Clinical Operations", title: "Clinical Trainer", active: true, joined: iso(-60) },
     { id: "u_t2", name: "Mohammed Ali", email: "mohammed.ali@novonordisk.com", password: "Trainer@123", role: "trainer", department: "Commercial", title: "Commercial Trainer", active: true, joined: iso(-45) },
     { id: "u_t3", name: "Anna Larsen", email: "anna.larsen@novonordisk.com", password: "Trainer@123", role: "trainer", department: "Quality Assurance", title: "Compliance Trainer", active: true, joined: iso(-30) },
     // Test trainees
-    { id: "u_e1", name: "Omar Farouk", email: "omar.farouk@novonordisk.com", password: "Trainee@123", role: "trainee", department: "Commercial", title: "Medical Representative", active: true, joined: iso(-14) },
-    { id: "u_e2", name: "Layla Ibrahim", email: "layla.ibrahim@novonordisk.com", password: "Trainee@123", role: "trainee", department: "Clinical Operations", title: "Clinical Research Associate", active: true, joined: iso(-10) },
-    { id: "u_e3", name: "John Mathew", email: "john.mathew@novonordisk.com", password: "Trainee@123", role: "trainee", department: "IT & Digital", title: "Data Analyst", active: true, joined: iso(-7) },
+    { id: "u_e1", name: "Omar Farouk", email: "omar.farouk@novonordisk.com", password: "Trainee@123", role: "trainee", department: "Commercial", title: "Medical Representative", batch: "2026-Q2 New Hires", active: true, joined: iso(-14) },
+    { id: "u_e2", name: "Layla Ibrahim", email: "layla.ibrahim@novonordisk.com", password: "Trainee@123", role: "trainee", department: "Clinical Operations", title: "Clinical Research Associate", batch: "2026-Q3 New Hires", active: true, joined: iso(-10) },
+    { id: "u_e3", name: "John Mathew", email: "john.mathew@novonordisk.com", password: "Trainee@123", role: "trainee", department: "IT & Digital", title: "Data Analyst", batch: "2026-Q3 New Hires", active: true, joined: iso(-7) },
   ];
 
   const eventBase = {

@@ -41,6 +41,7 @@ export default async function TraineeDetailPage({ params }: { params: Promise<{ 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-xl font-extrabold tracking-tight text-ink">{trainee.name}</h1>
+              {trainee.batch && <Badge tone="blue">{trainee.batch}</Badge>}
               {trainee.active ? <Badge tone="green">Active</Badge> : <Badge tone="red">Disabled</Badge>}
             </div>
             <p className="mt-0.5 text-sm text-ink2">{trainee.title} · {trainee.department}</p>

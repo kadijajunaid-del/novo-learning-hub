@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getDb, saveDb, audit } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { generateMeetingLink } from "@/lib/meetings";
+import { visibleToTrainee } from "@/lib/queries";
 import { uid } from "@/lib/format";
 
 /**
@@ -18,6 +19,9 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   const event = db.events.find((e) => e.id === id);
   if (!event || event.status !== "published") {
     return NextResponse.json({ error: "This event is not open for registration." }, { status: 400 });
+  }
+  if (user.role === "trainee" && !visibleToTrainee(event, user)) {
+    return NextResponse.json({ error: "This training is not available to your batch or department." }, { status: 403 });
   }
   // Validity window
   const today = new Date().toISOString().slice(0, 10);

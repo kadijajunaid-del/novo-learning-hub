@@ -1,6 +1,6 @@
 import { getDb } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
-import { eventSessions } from "@/lib/queries";
+import { eventSessions, visibleToTrainee } from "@/lib/queries";
 import MonthCalendar, { type CalEvent } from "@/components/month-calendar";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +10,7 @@ export default async function CalendarPage() {
   const db = await getDb();
 
   let events = db.events;
-  if (user.role === "trainee") events = events.filter((e) => e.status !== "draft");
+  if (user.role === "trainee") events = events.filter((e) => e.status !== "draft" && visibleToTrainee(e, user));
   if (user.role === "trainer") {
     // Events they own, plus programmes where they deliver at least one session.
     events = events.filter((e) => e.trainerId === user.id || (e.sessions ?? []).some((s) => s.trainerId === user.id));

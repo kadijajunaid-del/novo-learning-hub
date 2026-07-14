@@ -11,7 +11,8 @@ import NotifyMe from "@/components/notify-me";
 import EventActions from "@/components/event-actions";
 import AttendancePanel from "@/components/attendance-panel";
 import FeedbackForm from "@/components/feedback-form";
-import { regsFor, eventRating, eventSessions } from "@/lib/queries";
+import { regsFor, eventRating, eventSessions, visibleToTrainee } from "@/lib/queries";
+import SessionIcs from "@/components/session-ics";
 import { fmtDate, fmtTime, todayISO } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +24,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
   const event = db.events.find((e) => e.id === id);
   if (!event) notFound();
   if (user.role === "trainee" && event.status === "draft") notFound();
+  if (user.role === "trainee" && !visibleToTrainee(event, user) && !db.registrations.some((r) => r.eventId === event.id && r.userId === user.id)) notFound();
 
   const trainer = db.users.find((u) => u.id === event.trainerId);
   const regs = regsFor(db, event.id);
@@ -115,16 +117,21 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                           )}
                         </div>
                       </div>
-                      {s.meetingLink && (registered || canManage) && (
-                        <a
-                          href={s.meetingLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-strong"
-                        >
-                          <Video size={13} /> Join
-                        </a>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {s.meetingLink && (registered || canManage) && (
+                          <a
+                            href={s.meetingLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-strong"
+                          >
+                            <Video size={13} /> Join
+                          </a>
+                        )}
+                        {(registered || canManage) && event.status === "published" && (
+                          <SessionIcs eventId={event.id} sessionId={s.id} />
+                        )}
+                      </div>
                     </li>
                   );
                 })}

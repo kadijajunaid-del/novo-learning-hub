@@ -60,6 +60,16 @@ export function attendancePct(db: DB, eventIds?: string[]): number | null {
   return Math.round((regs.filter((r) => r.attended).length / regs.length) * 100);
 }
 
+/** Batch/department visibility: trainees only see events aimed at everyone,
+ *  their batch, or their department. Trainers and admins see everything. */
+export function visibleToTrainee(e: TrainingEvent, user: User): boolean {
+  const v = e.visibility || "Everyone";
+  if (v === "Everyone") return true;
+  if (v.startsWith("Batch: ")) return (user.batch ?? "") === v.slice(7);
+  if (v.startsWith("Department: ")) return user.department === v.slice(12);
+  return true;
+}
+
 export function isUpcoming(e: TrainingEvent): boolean {
   // Upcoming as long as any session is still ahead (or today).
   return e.status === "published" && eventSessions(e).some((s) => s.date >= todayISO());

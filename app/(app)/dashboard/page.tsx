@@ -10,7 +10,7 @@ import { EventCard } from "@/components/event-card";
 import { BarChart, LineChart, DonutChart, HBarChart } from "@/components/charts";
 import {
   notificationsFor, regsFor, trainerRating, attendancePct, isUpcoming, isToday,
-  trainingsPerMonth, attendanceTrend, categoryCounts, mostActiveTrainers,
+  trainingsPerMonth, attendanceTrend, categoryCounts, mostActiveTrainers, visibleToTrainee,
 } from "@/lib/queries";
 import { fmtDate, fmtDateShort, fmtTime, relTime, todayISO } from "@/lib/format";
 import type { DB, User } from "@/lib/types";
@@ -233,7 +233,7 @@ function TraineeDashboard({ db, user }: { db: DB; user: User }) {
   const decided = myRegs.filter((r) => r.attended !== null).length;
   const progress = decided ? Math.round((attended / decided) * 100) : 0;
   const recommended = db.events
-    .filter((e) => isUpcoming(e) && !myEventIds.includes(e.id))
+    .filter((e) => isUpcoming(e) && !myEventIds.includes(e.id) && visibleToTrainee(e, user))
     .slice(0, 3);
 
   return (

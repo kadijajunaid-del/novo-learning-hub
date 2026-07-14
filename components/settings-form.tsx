@@ -25,6 +25,7 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
   const [saved, setSaved] = useState(false);
   const [newDept, setNewDept] = useState("");
   const [newCat, setNewCat] = useState("");
+  const [newBatch, setNewBatch] = useState("");
 
   const save = async () => {
     setBusy(true);
@@ -134,6 +135,20 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
                 className="shrink-0 rounded-xl border border-line px-3 text-ink2 transition hover:bg-surface2" aria-label="Add category"
               ><Plus size={16} /></button>
             </div>
+          </div>
+          <div>
+            <label className="mb-2 block text-xs font-semibold text-ink2">Trainee batches</label>
+            {chipList(s.batches, (v) => setS({ ...s, batches: s.batches.filter((x) => x !== v) }))}
+            <div className="mt-2.5 flex gap-2">
+              <input className={inputCls} placeholder="Add batch… e.g. 2026-Q4 New Hires" value={newBatch} onChange={(e) => setNewBatch(e.target.value)} />
+              <button
+                onClick={() => { if (newBatch.trim()) { setS({ ...s, batches: [...s.batches, newBatch.trim()] }); setNewBatch(""); } }}
+                className="shrink-0 rounded-xl border border-line px-3 text-ink2 transition hover:bg-surface2" aria-label="Add batch"
+              ><Plus size={16} /></button>
+            </div>
+            <p className="mt-2 text-[11px] leading-relaxed text-ink3">
+              Every trainee belongs to a batch. Events with visibility "Batch: …" are only shown to trainees in that batch.
+            </p>
           </div>
         </div>
       </div>

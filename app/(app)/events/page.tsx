@@ -4,7 +4,7 @@ import { getDb } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { EventCard } from "@/components/event-card";
 import { EmptyState } from "@/components/ui";
-import { regsFor } from "@/lib/queries";
+import { regsFor, visibleToTrainee } from "@/lib/queries";
 import { todayISO } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +19,7 @@ export default async function EventsPage({
   const db = await getDb();
 
   let events = db.events;
-  if (user.role === "trainee") events = events.filter((e) => e.status === "published" || e.status === "completed");
+  if (user.role === "trainee") events = events.filter((e) => (e.status === "published" || e.status === "completed") && visibleToTrainee(e, user));
   if (user.role === "trainer") {
     events = events.filter((e) => e.trainerId === user.id || (e.sessions ?? []).some((s) => s.trainerId === user.id));
   }

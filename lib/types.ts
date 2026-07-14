@@ -8,6 +8,8 @@ export interface User {
   role: Role;
   department: string;
   title: string;
+  /** Trainee batch (from Settings → Trainee batches). Empty for trainers/admins. */
+  batch?: string;
   active: boolean;
   joined: string;
 }

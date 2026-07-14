@@ -21,13 +21,15 @@ function dt(date: string, time: string): string {
  * calendar entry per session, each with its own meeting link, location,
  * agenda, trainer and reminder alarm.
  */
-export function buildIcs(event: TrainingEvent, trainer: User | undefined, attendee: User, users?: User[]): string {
+export function buildIcs(event: TrainingEvent, trainer: User | undefined, attendee: User, users?: User[], onlySessionId?: string): string {
   const minutes = REMINDER_MINUTES[event.reminder] ?? 60;
-  const sessions = eventSessions(event);
-  const total = sessions.length;
+  const all = eventSessions(event);
+  const total = all.length;
+  const sessions = onlySessionId ? all.filter((s) => s.id === onlySessionId) : all;
   const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z");
 
-  const vevents = sessions.flatMap((s, i) => {
+  const vevents = sessions.flatMap((s) => {
+    const i = all.findIndex((x) => x.id === s.id);
     const sessionTrainer = (users ?? []).find((u) => u.id === s.trainerId) ?? trainer;
     const sessionName = s.name || `Session ${i + 1}`;
     const label = total > 1 ? `${event.title} — ${sessionName} (${i + 1}/${total})` : event.title;
