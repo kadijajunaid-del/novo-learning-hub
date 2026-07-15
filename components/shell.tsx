@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   LayoutDashboard, CalendarDays, GraduationCap, Users, BarChart3, Bell, Settings,
-  Sun, Moon, LogOut, Menu, X, BookOpen, UserCog,
+  Sun, Moon, LogOut, Menu, X, BookOpen, UserCog, Layers,
 } from "lucide-react";
 import { Avatar } from "./ui";
 
@@ -18,6 +18,7 @@ const NAV: Record<string, { href: string; label: string; icon: any }[]> = {
     { href: "/calendar", label: "Calendar", icon: CalendarDays },
     { href: "/trainers", label: "Trainers", icon: Users },
     { href: "/team-leaders", label: "Team Leaders", icon: UserCog },
+    { href: "/batches", label: "Batches", icon: Layers },
     { href: "/trainees", label: "Trainees", icon: GraduationCap },
     { href: "/reports", label: "Reports", icon: BarChart3 },
     { href: "/notifications", label: "Notifications", icon: Bell },
