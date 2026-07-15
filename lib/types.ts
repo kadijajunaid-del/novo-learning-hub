@@ -1,4 +1,4 @@
-export type Role = "admin" | "trainer" | "trainee";
+export type Role = "admin" | "trainer" | "trainee" | "team_leader";
 
 export interface User {
   id: string;
@@ -123,6 +123,8 @@ export interface Settings {
   maxTrainers: number;
   /** When false, only administrators can create events and their sessions. */
   trainersCanManageSessions: boolean;
+  /** Maps a batch name to the team leader (user id) responsible for it. */
+  batchLeaders: Record<string, string>;
   departments: string[];
   categories: string[];
   batches: string[];

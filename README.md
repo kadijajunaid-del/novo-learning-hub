@@ -18,6 +18,7 @@ The platform starts with a clean database: just the three sign-in accounts below
 | Administrator | admin@novonordisk.com | Admin@123 |
 | Trainer | trainer@novonordisk.com | Trainer@123 |
 | Trainee | trainee@novonordisk.com | Trainee@123 |
+| Team Leader | teamleader@novonordisk.com | Leader@123 |
 
 The administrator creates additional trainer accounts from the Trainers page.
 

@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   LayoutDashboard, CalendarDays, GraduationCap, Users, BarChart3, Bell, Settings,
-  Sun, Moon, LogOut, Menu, X, BookOpen,
+  Sun, Moon, LogOut, Menu, X, BookOpen, UserCog,
 } from "lucide-react";
 import { Avatar } from "./ui";
 
@@ -17,10 +17,17 @@ const NAV: Record<string, { href: string; label: string; icon: any }[]> = {
     { href: "/events", label: "Events", icon: BookOpen },
     { href: "/calendar", label: "Calendar", icon: CalendarDays },
     { href: "/trainers", label: "Trainers", icon: Users },
+    { href: "/team-leaders", label: "Team Leaders", icon: UserCog },
     { href: "/trainees", label: "Trainees", icon: GraduationCap },
     { href: "/reports", label: "Reports", icon: BarChart3 },
     { href: "/notifications", label: "Notifications", icon: Bell },
     { href: "/settings", label: "Settings", icon: Settings },
+  ],
+  team_leader: [
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/trainees", label: "My Trainees", icon: GraduationCap },
+    { href: "/calendar", label: "Calendar", icon: CalendarDays },
+    { href: "/notifications", label: "Notifications", icon: Bell },
   ],
   trainer: [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -133,7 +140,7 @@ export default function Shell({
             <Avatar name={user.name} size={38} />
             <div className="min-w-0 flex-1">
               <div className="truncate text-sm font-semibold text-ink">{user.name}</div>
-              <div className="truncate text-xs capitalize text-ink3">{user.role} · {user.title}</div>
+              <div className="truncate text-xs capitalize text-ink3">{user.role.replace("_", " ")} · {user.title}</div>
             </div>
             <button aria-label="Sign out" onClick={logout} className="text-ink3 transition hover:text-crit">
               <LogOut size={17} />

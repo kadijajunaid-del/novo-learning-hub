@@ -14,6 +14,9 @@ export function buildSeed(): DB {
     { id: "u_admin", name: "Administrator", email: "admin@novonordisk.com", password: "Admin@123", role: "admin", department: "People & Organisation", title: "L&D Administrator", active: true, joined },
     { id: "u_trainer", name: "Demo Trainer", email: "trainer@novonordisk.com", password: "Trainer@123", role: "trainer", department: "People & Organisation", title: "Trainer", active: true, joined },
     { id: "u_trainee", name: "Demo Trainee", email: "trainee@novonordisk.com", password: "Trainee@123", role: "trainee", department: "People & Organisation", title: "New Hire", batch: "2026-Q3 New Hires", active: true, joined },
+    { id: "u_leader", name: "Demo Team Leader", email: "teamleader@novonordisk.com", password: "Leader@123", role: "team_leader", department: "People & Organisation", title: "Team Leader", active: true, joined },
+    // Test team leaders
+    { id: "u_l1", name: "Fatima Noor", email: "fatima.noor@novonordisk.com", password: "Leader@123", role: "team_leader", department: "Commercial", title: "Team Leader", active: true, joined: iso(-90) },
     // Test trainers
     { id: "u_t1", name: "Sarah Ahmed", email: "sarah.ahmed@novonordisk.com", password: "Trainer@123", role: "trainer", department: "Clinical Operations", title: "Clinical Trainer", active: true, joined: iso(-60) },
     { id: "u_t2", name: "Mohammed Ali", email: "mohammed.ali@novonordisk.com", password: "Trainer@123", role: "trainer", department: "Commercial", title: "Commercial Trainer", active: true, joined: iso(-45) },
@@ -100,6 +103,11 @@ export function buildSeed(): DB {
       orgName: "Novo Nordisk",
       maxTrainers: 10,
       trainersCanManageSessions: true,
+      // Batch → team leader. Demo leader owns Q3 (has trainees); Fatima owns Q2.
+      batchLeaders: {
+        "2026-Q3 New Hires": "u_leader",
+        "2026-Q2 New Hires": "u_l1",
+      },
       departments: ["Clinical Operations", "Regulatory Affairs", "Commercial", "Manufacturing", "Quality Assurance", "IT & Digital", "People & Organisation"],
       categories: ["Onboarding", "Compliance & GxP", "Product Knowledge", "Clinical & Medical", "Commercial Excellence", "Digital & IT", "Leadership & Soft Skills", "Health & Safety"],
       batches: ["2026-Q1 New Hires", "2026-Q2 New Hires", "2026-Q3 New Hires"],

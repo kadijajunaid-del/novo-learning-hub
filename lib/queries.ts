@@ -60,6 +60,18 @@ export function attendancePct(db: DB, eventIds?: string[]): number | null {
   return Math.round((regs.filter((r) => r.attended).length / regs.length) * 100);
 }
 
+/** Batches a team leader is responsible for (from settings.batchLeaders). */
+export function teamLeaderBatches(db: DB, leaderId: string): string[] {
+  const map = db.settings.batchLeaders ?? {};
+  return Object.keys(map).filter((b) => map[b] === leaderId);
+}
+
+/** Trainees belonging to a team leader's batches. */
+export function teamLeaderTrainees(db: DB, leaderId: string): User[] {
+  const batches = new Set(teamLeaderBatches(db, leaderId));
+  return db.users.filter((u) => u.role === "trainee" && u.batch && batches.has(u.batch));
+}
+
 /** A trainer sees events they own, deliver a session of, or are assigned to. */
 export function trainerCanSee(e: TrainingEvent, trainerId: string): boolean {
   return (

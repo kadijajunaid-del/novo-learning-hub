@@ -1,6 +1,6 @@
 import { getDb } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
-import { eventSessions, visibleToTrainee, trainerCanSee } from "@/lib/queries";
+import { eventSessions, visibleToTrainee, trainerCanSee, teamLeaderTrainees } from "@/lib/queries";
 import MonthCalendar, { type CalEvent } from "@/components/month-calendar";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +13,12 @@ export default async function CalendarPage() {
   if (user.role === "trainee") events = events.filter((e) => e.status !== "draft" && visibleToTrainee(e, user));
   if (user.role === "trainer") {
     events = events.filter((e) => trainerCanSee(e, user.id));
+  }
+  if (user.role === "team_leader") {
+    // Events their trainees are registered for.
+    const teamIds = new Set(teamLeaderTrainees(db, user.id).map((t) => t.id));
+    const eventIds = new Set(db.registrations.filter((r) => teamIds.has(r.userId)).map((r) => r.eventId));
+    events = events.filter((e) => e.status !== "draft" && eventIds.has(e.id));
   }
 
   // One calendar entry per session, labelled "Sn/N" for multi-session programmes.

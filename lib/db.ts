@@ -27,6 +27,7 @@ declare global {
 const GENERIC_ACCOUNTS: DB["users"] = [
   { id: "u_trainer", name: "Demo Trainer", email: "trainer@novonordisk.com", password: "Trainer@123", role: "trainer", department: "People & Organisation", title: "Trainer", active: true, joined: "2026-04-13" },
   { id: "u_trainee", name: "Demo Trainee", email: "trainee@novonordisk.com", password: "Trainee@123", role: "trainee", department: "People & Organisation", title: "New Hire", active: true, joined: "2026-07-05" },
+  { id: "u_leader", name: "Demo Team Leader", email: "teamleader@novonordisk.com", password: "Leader@123", role: "team_leader", department: "People & Organisation", title: "Team Leader", active: true, joined: "2026-04-13" },
 ];
 
 function ensureGenericAccounts(db: DB): boolean {
@@ -40,6 +41,10 @@ function ensureGenericAccounts(db: DB): boolean {
   // Default settings added after a database was first created.
   if (typeof db.settings.trainersCanManageSessions === "undefined") {
     db.settings.trainersCanManageSessions = true;
+    changed = true;
+  }
+  if (typeof db.settings.batchLeaders === "undefined") {
+    db.settings.batchLeaders = {};
     changed = true;
   }
   return changed;

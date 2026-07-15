@@ -11,6 +11,7 @@ import { BarChart, LineChart, DonutChart, HBarChart } from "@/components/charts"
 import {
   notificationsFor, regsFor, trainerRating, attendancePct, isUpcoming, isToday,
   trainingsPerMonth, attendanceTrend, categoryCounts, mostActiveTrainers, visibleToTrainee, trainerCanSee,
+  teamLeaderBatches, teamLeaderTrainees,
 } from "@/lib/queries";
 import { fmtDate, fmtDateShort, fmtTime, relTime, todayISO } from "@/lib/format";
 import type { DB, User } from "@/lib/types";
@@ -30,11 +31,13 @@ export default async function DashboardPage() {
           {user.role === "admin" && "Here is what's happening across the Learning Hub today."}
           {user.role === "trainer" && "Here is your training schedule and trainee activity."}
           {user.role === "trainee" && "Continue your onboarding journey — here's what's next."}
+          {user.role === "team_leader" && "Here is how your team's onboarding is progressing."}
         </p>
       </div>
       {user.role === "admin" && <AdminDashboard db={db} user={user} />}
       {user.role === "trainer" && <TrainerDashboard db={db} user={user} />}
       {user.role === "trainee" && <TraineeDashboard db={db} user={user} />}
+      {user.role === "team_leader" && <TeamLeaderDashboard db={db} user={user} />}
     </div>
   );
 }
@@ -310,6 +313,93 @@ function TraineeDashboard({ db, user }: { db: DB; user: User }) {
         </Card>
         <NotificationsCard db={db} user={user} />
       </div>
+    </div>
+  );
+}
+
+/* ============================== TEAM LEADER ============================== */
+
+function TeamLeaderDashboard({ db, user }: { db: DB; user: User }) {
+  const batches = teamLeaderBatches(db, user.id);
+  const trainees = teamLeaderTrainees(db, user.id);
+  const traineeIds = new Set(trainees.map((t) => t.id));
+  const myRegs = db.registrations.filter((r) => traineeIds.has(r.userId));
+  const myEventIds = [...new Set(myRegs.map((r) => r.eventId))];
+
+  const attended = myRegs.filter((r) => r.attended === true).length;
+  const missed = myRegs.filter((r) => r.attended === false).length;
+  const decided = attended + missed;
+  const teamAttendance = decided ? Math.round((attended / decided) * 100) : 0;
+  const upcomingForTeam = db.events.filter((e) => isUpcoming(e) && myEventIds.includes(e.id)).length;
+  const completedForTeam = db.events.filter((e) => e.status === "completed" && myEventIds.includes(e.id)).length;
+
+  // Per-batch attendance for the chart.
+  const batchChart = batches.map((b) => {
+    const ids = new Set(trainees.filter((t) => t.batch === b).map((t) => t.id));
+    const regs = db.registrations.filter((r) => ids.has(r.userId) && r.attended !== null);
+    const att = regs.length ? Math.round((regs.filter((r) => r.attended).length / regs.length) * 100) : 0;
+    return { label: b.replace(" New Hires", ""), value: att };
+  });
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
+        <StatCard href="/trainees" label="My trainees" value={trainees.length} icon={<GraduationCap size={19} />} accent="var(--s1)" sub={batches.length ? batches.map((b) => b.replace(" New Hires", "")).join(", ") : "No batch assigned"} />
+        <StatCard label="Batches led" value={batches.length} icon={<Users size={19} />} accent="#001965" />
+        <StatCard href="/trainees" label="Total registrations" value={myRegs.length} icon={<ClipboardList size={19} />} accent="var(--s4)" />
+        <StatCard label="Team attendance" value={`${teamAttendance}%`} icon={<Percent size={19} />} accent="var(--s2)" sub={`${attended} of ${decided || "0"} attended`} />
+        <StatCard label="Upcoming sessions" value={upcomingForTeam} icon={<CalendarDays size={19} />} accent="var(--s3)" />
+        <StatCard label="Completed" value={completedForTeam} icon={<CheckCircle2 size={19} />} accent="var(--s2)" />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card className="p-5 lg:col-span-2">
+          <SectionHeader title="My trainees" sub="Onboarding progress across your batches" action={<Link href="/trainees" className="text-xs font-semibold text-primary hover:underline">Full list</Link>} />
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-ink3">
+                  <th className="pb-2 pr-4 font-semibold">Employee</th>
+                  <th className="pb-2 pr-4 font-semibold">Batch</th>
+                  <th className="pb-2 pr-4 font-semibold">Registered</th>
+                  <th className="pb-2 pr-4 font-semibold">Attended</th>
+                  <th className="pb-2 font-semibold">Missed</th>
+                </tr>
+              </thead>
+              <tbody>
+                {trainees.map((t) => {
+                  const regs = db.registrations.filter((r) => r.userId === t.id);
+                  return (
+                    <tr key={t.id} className="border-b border-line/60 last:border-0">
+                      <td className="py-2.5 pr-4">
+                        <Link href={`/trainees/${t.id}`} className="flex items-center gap-2.5">
+                          <Avatar name={t.name} size={28} />
+                          <span className="font-medium text-ink hover:text-primary">{t.name}</span>
+                        </Link>
+                      </td>
+                      <td className="py-2.5 pr-4"><Badge tone="blue">{(t.batch ?? "").replace(" New Hires", "")}</Badge></td>
+                      <td className="py-2.5 pr-4 font-semibold text-ink">{regs.length}</td>
+                      <td className="py-2.5 pr-4 text-ok">{regs.filter((r) => r.attended === true).length}</td>
+                      <td className="py-2.5 text-crit">{regs.filter((r) => r.attended === false).length}</td>
+                    </tr>
+                  );
+                })}
+                {!trainees.length && (
+                  <tr><td colSpan={5} className="py-6 text-center text-xs text-ink3">No trainees in your batches yet. Ask the administrator to assign a batch to you.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+        <NotificationsCard db={db} user={user} />
+      </div>
+
+      {batchChart.length > 0 && (
+        <Card className="p-5">
+          <SectionHeader title="Attendance by batch" sub="Share of attended sessions in each batch you lead" />
+          <HBarChart data={batchChart} valueSuffix="%" color="var(--s2)" />
+        </Card>
+      )}
     </div>
   );
 }

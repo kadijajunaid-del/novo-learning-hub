@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getDb } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import TraineeManager, { type TraineeRow } from "@/components/trainee-manager";
-import { trainerCanSee } from "@/lib/queries";
+import { trainerCanSee, teamLeaderBatches } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -21,12 +21,15 @@ export default async function TraineesPage({
   const db = await getDb();
   const hasFilters = Boolean(q || department || batch || from || to);
 
-  // Trainers see the people registered for their sessions; admin sees everyone.
+  // Trainers see people registered for their sessions; team leaders see their
+  // batches; admin sees everyone.
   const myEventIds = user.role === "trainer" ? db.events.filter((e) => trainerCanSee(e, user.id)).map((e) => e.id) : null;
+  const myBatches = user.role === "team_leader" ? new Set(teamLeaderBatches(db, user.id)) : null;
   const needle = q.trim().toLowerCase();
   const trainees = db.users.filter((u) => {
     if (u.role !== "trainee") return false;
     if (myEventIds && !db.registrations.some((r) => r.userId === u.id && myEventIds.includes(r.eventId))) return false;
+    if (myBatches && !(u.batch && myBatches.has(u.batch))) return false;
     if (needle && !`${u.name} ${u.email} ${u.title}`.toLowerCase().includes(needle)) return false;
     if (department && u.department !== department) return false;
     if (batch && (u.batch ?? "") !== batch) return false;
@@ -56,7 +59,7 @@ export default async function TraineesPage({
     <div className="mx-auto max-w-6xl">
       <div className="mb-6">
         <h1 className="text-2xl font-extrabold tracking-tight text-brand">
-          {user.role === "trainer" ? "My trainees" : "Trainees"}
+          {user.role === "trainer" || user.role === "team_leader" ? "My trainees" : "Trainees"}
         </h1>
         <p className="mt-1 text-sm text-ink3">
           {rows.length} new hire{rows.length === 1 ? "" : "s"} onboarding — click a person for their full training history.

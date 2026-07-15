@@ -5,6 +5,7 @@ import { getDb } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { Card, Avatar, Badge, StatCard } from "@/components/ui";
 import DeleteUser from "@/components/delete-user";
+import { teamLeaderBatches } from "@/lib/queries";
 import { fmtDate, fmtDateShort, fmtTime } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +17,8 @@ export default async function TraineeDetailPage({ params }: { params: Promise<{ 
   const db = await getDb();
   const trainee = db.users.find((u) => u.id === id && u.role === "trainee");
   if (!trainee) notFound();
+  // Team leaders may only view trainees in their own batches.
+  if (user.role === "team_leader" && !teamLeaderBatches(db, user.id).includes(trainee.batch ?? "")) notFound();
 
   const regs = db.registrations.filter((r) => r.userId === id);
   const history = regs
