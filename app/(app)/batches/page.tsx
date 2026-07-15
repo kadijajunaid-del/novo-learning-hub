@@ -10,7 +10,7 @@ export default async function BatchesPage() {
   if (!user || user.role !== "admin") redirect("/dashboard");
   const db = await getDb();
 
-  const person = (u: any) => ({ id: u.id, name: u.name, email: u.email, department: u.department });
+  const person = (u: any) => ({ id: u.id, name: u.name, email: u.email, department: u.department, batch: u.batch ?? "" });
 
   const rows: BatchRow[] = db.settings.batches.map((name) => ({
     name,

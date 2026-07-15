@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Plus, Trash2, UserCog, UserMinus, UserPlus, X } from "lucide-react";
 import { Avatar, Badge } from "./ui";
 
-type Person = { id: string; name: string; email: string; department: string };
+type Person = { id: string; name: string; email: string; department: string; batch?: string };
 export type BatchRow = {
   name: string;
   leaderId: string;
@@ -30,8 +30,15 @@ export default function BatchManager({
   const [newName, setNewName] = useState("");
   const [error, setError] = useState("");
   const [addingTo, setAddingTo] = useState<string | null>(null);
-  const [pickTrainee, setPickTrainee] = useState("");
+  const [picked, setPicked] = useState<string[]>([]);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
+  const openAdd = (batch: string) => {
+    setAddingTo(addingTo === batch ? null : batch);
+    setPicked([]);
+  };
+  const togglePick = (id: string) =>
+    setPicked((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   const call = async (method: string, body: any, tag: string) => {
     setBusy(tag);
@@ -123,26 +130,63 @@ export default function BatchManager({
             <div>
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-xs font-semibold text-ink2">Trainees</span>
-                <button onClick={() => { setAddingTo(addingTo === b.name ? null : b.name); setPickTrainee(""); }} className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
-                  <UserPlus size={13} /> Add trainee
+                <button onClick={() => openAdd(b.name)} className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
+                  <UserPlus size={13} /> Add trainees
                 </button>
               </div>
 
-              {addingTo === b.name && (
-                <div className="mb-3 flex items-center gap-2">
-                  <select className={inputCls} value={pickTrainee} onChange={(e) => setPickTrainee(e.target.value)}>
-                    <option value="">Select a trainee…</option>
-                    {availableFor(b).map((t) => <option key={t.id} value={t.id}>{t.name} · {t.department}</option>)}
-                  </select>
-                  <button
-                    disabled={!pickTrainee || busy === "add" + b.name}
-                    onClick={async () => { if (await call("PATCH", { name: b.name, addTraineeIds: [pickTrainee] }, "add" + b.name)) { setPickTrainee(""); setAddingTo(null); } }}
-                    className="shrink-0 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-strong disabled:opacity-50"
-                  >
-                    Add
-                  </button>
-                </div>
-              )}
+              {addingTo === b.name && (() => {
+                const options = availableFor(b);
+                const allPicked = options.length > 0 && picked.length === options.length;
+                return (
+                  <div className="mb-3 rounded-xl border border-line bg-surface2/50 p-3">
+                    {options.length ? (
+                      <>
+                        <div className="mb-2 flex items-center justify-between">
+                          <span className="text-[11px] font-bold uppercase tracking-wide text-ink3">Select trainees</span>
+                          <button
+                            onClick={() => setPicked(allPicked ? [] : options.map((t) => t.id))}
+                            className="text-[11px] font-semibold text-primary hover:underline"
+                          >
+                            {allPicked ? "Clear all" : "Select all"}
+                          </button>
+                        </div>
+                        <div className="max-h-56 space-y-1 overflow-y-auto pr-1">
+                          {options.map((t) => {
+                            const on = picked.includes(t.id);
+                            return (
+                              <label key={t.id} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 transition hover:bg-surface">
+                                <input type="checkbox" checked={on} onChange={() => togglePick(t.id)} className="h-4 w-4 shrink-0 accent-[var(--primary)]" />
+                                <Avatar name={t.name} size={26} />
+                                <span className="min-w-0 flex-1">
+                                  <span className="block truncate text-sm font-medium text-ink">{t.name}</span>
+                                  <span className="block truncate text-xs text-ink3">{t.department}{t.batch ? ` · currently ${t.batch}` : ""}</span>
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                        <div className="mt-3 flex items-center justify-between gap-2">
+                          <span className="text-xs text-ink3">{picked.length} selected</span>
+                          <div className="flex gap-2">
+                            <button onClick={() => { setAddingTo(null); setPicked([]); }} className="rounded-lg border border-line px-3 py-2 text-sm font-medium text-ink2 transition hover:bg-surface">Cancel</button>
+                            <button
+                              disabled={!picked.length || busy === "add" + b.name}
+                              onClick={async () => { if (await call("PATCH", { name: b.name, addTraineeIds: picked }, "add" + b.name)) { setPicked([]); setAddingTo(null); } }}
+                              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-strong disabled:opacity-50"
+                            >
+                              {busy === "add" + b.name && <Loader2 size={14} className="animate-spin" />}
+                              Add {picked.length || ""} trainee{picked.length === 1 ? "" : "s"}
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="py-2 text-center text-xs text-ink3">No other trainees to add — everyone is already in this batch.</p>
+                    )}
+                  </div>
+                );
+              })()}
 
               {b.trainees.length ? (
                 <ul className="divide-y divide-line/70">
