@@ -57,10 +57,10 @@ export default function EventForm({
     instructions: existing?.instructions ?? "",
     reminder: existing?.reminder ?? "1 hour",
     repeat: existing?.repeat ?? "None",
-    visibility: existing?.visibility ?? "Everyone",
     validFrom: existing?.validFrom ?? "",
     validUntil: existing?.validUntil ?? "",
   });
+  const [visibleBatches, setVisibleBatches] = useState<string[]>(existing?.visibleBatches ?? []);
   const [allowTrainerSessions, setAllowTrainerSessions] = useState(existing?.allowTrainerSessions ?? false);
   const [assignedTrainerIds, setAssignedTrainerIds] = useState<string[]>(existing?.assignedTrainerIds ?? []);
   const toggleAssigned = (id: string) =>
@@ -112,6 +112,7 @@ export default function EventForm({
       agenda: f.agenda.split("\n").map((s) => s.trim()).filter(Boolean),
       materials,
       sessions,
+      visibleBatches,
       allowTrainerSessions,
       assignedTrainerIds,
       status,
@@ -317,12 +318,38 @@ export default function EventForm({
           <input type="date" className={inputCls} value={f.validUntil} onChange={set("validUntil")} />
         </div>
         <div className="sm:col-span-2">
-          <label className={labelCls}>Visibility</label>
-          <select className={inputCls} value={f.visibility} onChange={set("visibility")}>
-            <option>Everyone</option>
-            {batches.map((b) => <option key={b} value={`Batch: ${b}`}>Batch: {b}</option>)}
-            {departments.map((d) => <option key={d} value={`Department: ${d}`}>Department: {d}</option>)}
-          </select>
+          <label className={labelCls}>Visible to</label>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setVisibleBatches([])}
+              className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
+                visibleBatches.length === 0 ? "border-primary bg-primary text-white" : "border-line text-ink2 hover:bg-surface2"
+              }`}
+            >
+              {visibleBatches.length === 0 ? "✓ " : ""}Everyone
+            </button>
+            {batches.map((b) => {
+              const on = visibleBatches.includes(b);
+              return (
+                <button
+                  key={b}
+                  type="button"
+                  onClick={() => setVisibleBatches((prev) => (prev.includes(b) ? prev.filter((x) => x !== b) : [...prev, b]))}
+                  className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
+                    on ? "border-primary bg-primary text-white" : "border-line text-ink2 hover:bg-surface2"
+                  }`}
+                >
+                  {on ? "✓ " : ""}{b}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-1.5 text-[11px] leading-relaxed text-ink3">
+            {visibleBatches.length === 0
+              ? "All trainees can see this event."
+              : `Only trainees in ${visibleBatches.length === 1 ? "this batch" : "these batches"} will see it.`}
+          </p>
         </div>
         <div className="sm:col-span-2">
           <label className={labelCls}>Agenda <span className="font-normal text-ink3">(one item per line)</span></label>

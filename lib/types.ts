@@ -58,7 +58,9 @@ export interface TrainingEvent {
   instructions: string;
   reminder: string; // "15 mins" | "30 mins" | "1 hour" | "1 day"
   repeat: string; // "None" | "Daily" | "Weekly" | "Monthly" | "Custom"
-  visibility: string; // "Everyone" | "Specific Batch" | "Specific Department" | "Specific Team"
+  visibility: string; // human label: "Everyone" or "Batches: A, B"
+  /** Batches allowed to see this event. Empty = everyone. */
+  visibleBatches?: string[];
   /** Registration window. Empty string = no restriction. */
   validFrom: string; // YYYY-MM-DD
   validUntil: string; // YYYY-MM-DD

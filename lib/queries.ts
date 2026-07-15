@@ -81,11 +81,15 @@ export function trainerCanSee(e: TrainingEvent, trainerId: string): boolean {
   );
 }
 
-/** Batch/department visibility: trainees only see events aimed at everyone,
- *  their batch, or their department. Trainers and admins see everything. */
+/** Batch visibility: an event with visibleBatches is shown only to trainees in
+ *  those batches; an empty list means everyone. Trainers/admins see all. */
 export function visibleToTrainee(e: TrainingEvent, user: User): boolean {
+  const batches = e.visibleBatches;
+  if (Array.isArray(batches) && batches.length) {
+    return batches.includes(user.batch ?? "");
+  }
+  // Backward compatibility with the old single-string visibility field.
   const v = e.visibility || "Everyone";
-  if (v === "Everyone") return true;
   if (v.startsWith("Batch: ")) return (user.batch ?? "") === v.slice(7);
   if (v.startsWith("Department: ")) return user.department === v.slice(12);
   return true;

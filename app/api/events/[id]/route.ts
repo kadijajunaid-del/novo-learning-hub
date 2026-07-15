@@ -4,6 +4,7 @@ import { getSessionUser } from "@/lib/auth";
 import { generateMeetingLink } from "@/lib/meetings";
 import { normalizeSessions } from "@/lib/sessions";
 import { syncEventFromSessions, eventSessions } from "@/lib/queries";
+import { visibilityFields } from "@/lib/visibility";
 import { uid } from "@/lib/format";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -64,9 +65,14 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ ok: true, id: copy.id });
   } else {
     // Field edit
-    const editable = ["title", "description", "category", "timeZone", "maxParticipants", "materials", "agenda", "prerequisites", "instructions", "reminder", "repeat", "visibility", "validFrom", "validUntil", "status"];
+    const editable = ["title", "description", "category", "timeZone", "maxParticipants", "materials", "agenda", "prerequisites", "instructions", "reminder", "repeat", "validFrom", "validUntil", "status"];
     for (const k of editable) {
       if (k in body) (event as any)[k] = body[k];
+    }
+    if ("visibleBatches" in body) {
+      const { visibility, visibleBatches } = visibilityFields(body, db.settings.batches);
+      event.visibility = visibility;
+      event.visibleBatches = visibleBatches;
     }
     event.maxParticipants = Number(event.maxParticipants) || 25;
     const trainerIds = new Set(db.users.filter((u) => u.role === "trainer").map((u) => u.id));

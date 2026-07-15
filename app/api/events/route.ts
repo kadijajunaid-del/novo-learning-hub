@@ -3,6 +3,7 @@ import { getDb, saveDb, audit } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { normalizeSessions } from "@/lib/sessions";
 import { syncEventFromSessions } from "@/lib/queries";
+import { visibilityFields } from "@/lib/visibility";
 import { uid } from "@/lib/format";
 import type { TrainingEvent } from "@/lib/types";
 
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
     instructions: body.instructions || "",
     reminder: body.reminder || "1 hour",
     repeat: body.repeat || "None",
-    visibility: body.visibility || "Everyone",
+    ...visibilityFields(body, db.settings.batches),
     validFrom: typeof body.validFrom === "string" ? body.validFrom : "",
     validUntil: typeof body.validUntil === "string" ? body.validUntil : "",
     allowTrainerSessions,
