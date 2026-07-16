@@ -48,7 +48,7 @@ export function buildIcs(event: TrainingEvent, trainer: User | undefined, attend
 
     return [
       "BEGIN:VEVENT",
-      `UID:${event.id}-${s.id}-${attendee.id}@learninghub.novonordisk.com`,
+      `UID:${event.id}-${s.id}-${attendee.id}@top.cdcturkiye.org`,
       `DTSTAMP:${stamp}`,
       `DTSTART;TZID=${event.timeZone}:${dt(s.date, s.startTime)}`,
       `DTEND;TZID=${event.timeZone}:${dt(s.date, s.endTime)}`,
@@ -71,7 +71,7 @@ export function buildIcs(event: TrainingEvent, trainer: User | undefined, attend
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Novo Nordisk//Learning Hub//EN",
+    "PRODID:-//CDC Turkiye//TOP Portal//EN",
     "METHOD:REQUEST",
     ...vevents,
     "END:VCALENDAR",

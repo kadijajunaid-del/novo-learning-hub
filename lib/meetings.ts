@@ -17,11 +17,11 @@ export function generateMeetingLink(platform: Platform, title: string): string {
     case "Microsoft Teams":
       return `https://teams.microsoft.com/l/meetup-join/19%3ameeting_${rand(alnum, 24)}%40thread.v2/0`;
     case "Zoom":
-      return `https://novonordisk.zoom.us/j/9${rand(digits, 9)}?pwd=${rand(alnum, 20)}`;
+      return `https://cdcturkiye.zoom.us/j/9${rand(digits, 9)}?pwd=${rand(alnum, 20)}`;
     case "Google Meet":
       return `https://meet.google.com/${rand(lower, 3)}-${rand(lower, 4)}-${rand(lower, 3)}`;
     case "Cisco Webex":
-      return `https://novonordisk.webex.com/meet/${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 24)}-${rand(digits, 4)}`;
+      return `https://cdcturkiye.webex.com/meet/${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 24)}-${rand(digits, 4)}`;
     default:
       return "";
   }

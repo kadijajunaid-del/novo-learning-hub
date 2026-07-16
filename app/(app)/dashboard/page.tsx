@@ -28,7 +28,7 @@ export default async function DashboardPage() {
           {greeting()}, {user.name.split(" ")[0]}
         </h1>
         <p className="mt-1 text-sm text-ink3">
-          {user.role === "admin" && "Here is what's happening across the Learning Hub today."}
+          {user.role === "admin" && "Here is what's happening across the TOP Portal today."}
           {user.role === "trainer" && "Here is your training schedule and trainee activity."}
           {user.role === "trainee" && "Continue your onboarding journey — here's what's next."}
           {user.role === "team_leader" && "Here is how your team's onboarding is progressing."}

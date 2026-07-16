@@ -178,7 +178,7 @@ export default function TraineeManager({
               </div>
               <div>
                 <label className="mb-1.5 block text-xs font-semibold text-ink2">Work email</label>
-                <input className={inputCls} value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} placeholder="aisha.rahman@novonordisk.com" />
+                <input className={inputCls} value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} placeholder="aisha.rahman@cdcturkiye.org" />
               </div>
               <div>
                 <label className="mb-1.5 block text-xs font-semibold text-ink2">Batch</label>

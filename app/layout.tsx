@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Novo Nordisk Learning Hub",
-  description: "Employee training portal for Novo Nordisk.",
+  title: "TOP Portal — CDC Türkiye",
+  description: "Training Organizing & Planning portal — CDC Türkiye.",
 };
 
 const themeInit = `try{const t=localStorage.getItem("nn-theme");if(t==="dark"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}`;

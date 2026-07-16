@@ -166,7 +166,7 @@ export default function TeamLeaderManager({
               </div>
               <div>
                 <label className="mb-1.5 block text-xs font-semibold text-ink2">Work email</label>
-                <input className={inputCls} value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} placeholder="fatima.noor@novonordisk.com" />
+                <input className={inputCls} value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} placeholder="fatima.noor@cdcturkiye.org" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>

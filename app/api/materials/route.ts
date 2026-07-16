@@ -6,7 +6,7 @@ export async function GET(req: Request) {
   if (!user) return new Response("Not signed in", { status: 401 });
   const { searchParams } = new URL(req.url);
   const name = searchParams.get("name") ?? "material.txt";
-  const body = `Novo Nordisk Learning Hub — Training Material\n\nFile: ${name}\n\nThis is a placeholder file served by the demo environment.\nIn production, materials are stored in secure blob storage (e.g. Azure Blob / SharePoint)\nand streamed here with access control.\n`;
+  const body = `CDC Türkiye TOP Portal — Training Material\n\nFile: ${name}\n\nThis is a placeholder file served by the demo environment.\nIn production, materials are stored in secure blob storage (e.g. Azure Blob / SharePoint)\nand streamed here with access control.\n`;
   return new Response(body, {
     headers: {
       "Content-Type": "text/plain; charset=utf-8",

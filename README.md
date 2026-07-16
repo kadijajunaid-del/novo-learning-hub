@@ -1,4 +1,4 @@
-# Novo Nordisk Learning Hub
+# TOP Portal — Training Organizing & Planning (CDC Türkiye)
 
 Enterprise employee training & event management portal — onboarding, training events, one-click "Notify Me" registration with automatic meeting-link provisioning and Outlook calendar invitations, dashboards, and reports.
 
@@ -15,10 +15,10 @@ The platform starts with a clean database: just the three sign-in accounts below
 
 | Role | Email | Password |
 |---|---|---|
-| Administrator | admin@novonordisk.com | Admin@123 |
-| Trainer | trainer@novonordisk.com | Trainer@123 |
-| Trainee | trainee@novonordisk.com | Trainee@123 |
-| Team Leader | teamleader@novonordisk.com | Leader@123 |
+| Administrator | admin@cdcturkiye.org | Admin@123 |
+| Trainer | trainer@cdcturkiye.org | Trainer@123 |
+| Trainee | trainee@cdcturkiye.org | Trainee@123 |
+| Team Leader | teamleader@cdcturkiye.org | Leader@123 |
 
 The administrator creates additional trainer accounts from the Trainers page.
 

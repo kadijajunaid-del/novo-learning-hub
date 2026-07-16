@@ -1,4 +1,4 @@
-# Novo Nordisk Learning Hub — User Guide
+# TOP Portal (CDC Türkiye) — User Guide
 
 *Version 2.0 · July 2026 · A formatted Word/PDF version of this guide is in this folder.*
 
@@ -17,10 +17,10 @@ Training is organised as **events (programmes)**: each event contains one or mor
 
 | Role | Email | Password |
 |---|---|---|
-| Administrator | admin@novonordisk.com | Admin@123 |
-| Trainer | trainer@novonordisk.com | Trainer@123 |
-| Trainee | trainee@novonordisk.com | Trainee@123 |
-| Team Leader | teamleader@novonordisk.com | Leader@123 |
+| Administrator | admin@cdcturkiye.org | Admin@123 |
+| Trainer | trainer@cdcturkiye.org | Trainer@123 |
+| Trainee | trainee@cdcturkiye.org | Trainee@123 |
+| Team Leader | teamleader@cdcturkiye.org | Leader@123 |
 
 **Navigation:** sidebar (Dashboard, Events, Calendar, Notifications + role-specific pages), bell icon (notifications), moon/sun (dark mode), sign out at the bottom of the sidebar.
 

@@ -25,9 +25,9 @@ declare global {
 // Generic demo sign-ins. Ensured on every load so databases created before
 // these accounts existed (e.g. an already-seeded Redis store) get them too.
 const GENERIC_ACCOUNTS: DB["users"] = [
-  { id: "u_trainer", name: "Demo Trainer", email: "trainer@novonordisk.com", password: "Trainer@123", role: "trainer", department: "People & Organisation", title: "Trainer", active: true, joined: "2026-04-13" },
-  { id: "u_trainee", name: "Demo Trainee", email: "trainee@novonordisk.com", password: "Trainee@123", role: "trainee", department: "People & Organisation", title: "New Hire", active: true, joined: "2026-07-05" },
-  { id: "u_leader", name: "Demo Team Leader", email: "teamleader@novonordisk.com", password: "Leader@123", role: "team_leader", department: "People & Organisation", title: "Team Leader", active: true, joined: "2026-04-13" },
+  { id: "u_trainer", name: "Demo Trainer", email: "trainer@cdcturkiye.org", password: "Trainer@123", role: "trainer", department: "People & Organisation", title: "Trainer", active: true, joined: "2026-04-13" },
+  { id: "u_trainee", name: "Demo Trainee", email: "trainee@cdcturkiye.org", password: "Trainee@123", role: "trainee", department: "People & Organisation", title: "New Hire", active: true, joined: "2026-07-05" },
+  { id: "u_leader", name: "Demo Team Leader", email: "teamleader@cdcturkiye.org", password: "Leader@123", role: "team_leader", department: "People & Organisation", title: "Team Leader", active: true, joined: "2026-04-13" },
 ];
 
 function ensureGenericAccounts(db: DB): boolean {

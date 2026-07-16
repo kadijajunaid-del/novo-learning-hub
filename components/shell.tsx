@@ -8,6 +8,7 @@ import {
   Sun, Moon, LogOut, Menu, X, BookOpen, UserCog, Layers,
 } from "lucide-react";
 import { Avatar } from "./ui";
+import { TopLogo } from "./logo";
 
 type ShellUser = { id: string; name: string; role: string; title: string };
 
@@ -45,21 +46,6 @@ const NAV: Record<string, { href: string; label: string; icon: any }[]> = {
   ],
 };
 
-export function NNLogo({ compact = false }: { compact?: boolean }) {
-  return (
-    <span className="flex items-center gap-2.5">
-      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-navy text-white dark:bg-primary">
-        <GraduationCap size={20} strokeWidth={2.2} />
-      </span>
-      {!compact && (
-        <span className="leading-tight">
-          <span className="block text-[15px] font-extrabold tracking-tight text-brand">novo nordisk</span>
-          <span className="block text-[11px] font-medium text-ink3">Learning Hub</span>
-        </span>
-      )}
-    </span>
-  );
-}
 
 function ThemeToggle() {
   const [, force] = useState(0);
@@ -133,7 +119,7 @@ export default function Shell({
       {/* sidebar (desktop) */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-line bg-surface lg:flex">
         <div className="px-5 py-5">
-          <Link href="/dashboard"><NNLogo /></Link>
+          <Link href="/dashboard"><TopLogo /></Link>
         </div>
         {links}
         <div className="mt-auto border-t border-line p-4">
@@ -156,7 +142,7 @@ export default function Shell({
           <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
           <div className="absolute inset-y-0 left-0 flex w-64 flex-col bg-surface pt-5 shadow-2xl">
             <div className="mb-4 flex items-center justify-between px-5">
-              <NNLogo />
+              <TopLogo />
               <button aria-label="Close menu" onClick={() => setOpen(false)}><X size={20} className="text-ink2" /></button>
             </div>
             {links}
