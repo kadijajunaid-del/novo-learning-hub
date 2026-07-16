@@ -32,6 +32,34 @@ const GENERIC_ACCOUNTS: DB["users"] = [
 
 function ensureGenericAccounts(db: DB): boolean {
   let changed = false;
+
+  // Rebrand migration: move legacy @novonordisk.com logins to @cdcturkiye.org
+  // in place (same account, same password), so existing databases switch over
+  // automatically. If the new address already exists, drop the legacy duplicate.
+  const LEGACY = "@novonordisk.com";
+  const NEW = "@cdcturkiye.org";
+  db.users = db.users.filter((u) => {
+    if (!u.email.endsWith(LEGACY)) return true;
+    const next = u.email.slice(0, -LEGACY.length) + NEW;
+    if (db.users.some((x) => x.email === next)) {
+      changed = true;
+      return false; // duplicate of an already-migrated account
+    }
+    u.email = next;
+    changed = true;
+    return true;
+  });
+  // Safety: never keep two users with the same id.
+  const seenIds = new Set<string>();
+  db.users = db.users.filter((u) => {
+    if (seenIds.has(u.id)) {
+      changed = true;
+      return false;
+    }
+    seenIds.add(u.id);
+    return true;
+  });
+
   for (const acc of GENERIC_ACCOUNTS) {
     if (!db.users.some((u) => u.email === acc.email)) {
       db.users.push({ ...acc });
