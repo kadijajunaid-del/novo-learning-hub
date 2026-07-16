@@ -6,9 +6,9 @@ import { visibleToTrainee } from "@/lib/queries";
 import { uid } from "@/lib/format";
 
 /**
- * The "Notify Me" flow: registers the trainee, provisions the meeting room
- * on the selected platform, sends the confirmation notification, and points
- * the client at the Outlook calendar invitation (.ics) download.
+ * The "Notify Me" flow: registers the trainee for the whole programme,
+ * provisions the meeting rooms and sends the confirmation notification.
+ * Calendar invitations are downloaded per session from the event page.
  */
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -50,7 +50,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     id: uid("nt"),
     to: user.id,
     title: `Registered: ${event.title}`,
-    body: `You are confirmed for ${event.date}, ${event.startTime}–${event.endTime} with ${trainer?.name ?? "your trainer"}. A confirmation email and Outlook calendar invitation (with the ${event.platform} link, agenda and a ${event.reminder} reminder) have been sent to ${user.email}.`,
+    body: `You are confirmed for ${event.title}, starting ${event.date} with ${trainer?.name ?? "your trainer"}. A confirmation email has been sent to ${user.email}. Add each session to your calendar with its Outlook button on the event page.`,
     kind: "registration",
     at: new Date().toISOString(),
     readBy: [],
@@ -70,7 +70,6 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   return NextResponse.json({
     ok: true,
     meetingLink: event.meetingLink,
-    icsUrl: `/api/events/${id}/ics`,
     message: "You have successfully registered for this training.",
   });
 }

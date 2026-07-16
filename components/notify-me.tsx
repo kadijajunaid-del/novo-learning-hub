@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { BellRing, CalendarPlus, CheckCircle2, Copy, Loader2, Video, X } from "lucide-react";
+import { BellRing, CheckCircle2, Copy, Loader2, Video, X } from "lucide-react";
 
 export default function NotifyMe({
   eventId,
@@ -18,7 +18,7 @@ export default function NotifyMe({
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [result, setResult] = useState<{ meetingLink: string; icsUrl: string } | null>(null);
+  const [result, setResult] = useState<{ meetingLink: string } | null>(null);
   const [copied, setCopied] = useState(false);
 
   const register = async () => {
@@ -31,12 +31,7 @@ export default function NotifyMe({
       setError(data.error ?? "Registration failed.");
       return;
     }
-    setResult({ meetingLink: data.meetingLink, icsUrl: data.icsUrl });
-    // Outlook integration: the calendar invitation downloads automatically.
-    const a = document.createElement("a");
-    a.href = data.icsUrl;
-    a.download = "";
-    a.click();
+    setResult({ meetingLink: data.meetingLink });
     router.refresh();
   };
 
@@ -54,10 +49,10 @@ export default function NotifyMe({
         <div className="flex items-center gap-2 rounded-xl bg-ok/10 px-4 py-3 text-sm font-semibold text-ok">
           <CheckCircle2 size={17} /> You are registered for this training.
         </div>
+        <p className="text-xs leading-relaxed text-ink3">
+          Use the <span className="font-semibold">Outlook</span> button on each session above to add it to your calendar.
+        </p>
         <div className="flex flex-wrap gap-2">
-          <a href={`/api/events/${eventId}/ics`} className="inline-flex items-center gap-2 rounded-xl border border-line px-4 py-2.5 text-sm font-semibold text-ink2 transition hover:bg-surface2">
-            <CalendarPlus size={15} /> Add to Outlook Calendar (.ics)
-          </a>
           <button onClick={cancel} disabled={busy} className="inline-flex items-center gap-2 rounded-xl border border-crit/40 px-4 py-2.5 text-sm font-semibold text-crit transition hover:bg-crit/10 disabled:opacity-60">
             {busy ? <Loader2 size={15} className="animate-spin" /> : <X size={15} />} Cancel registration
           </button>
@@ -80,7 +75,7 @@ export default function NotifyMe({
       )}
       {!result && !full && (
         <p className="text-xs leading-relaxed text-ink3">
-          One click registers you for the whole programme, creates the meetings, emails your confirmation and adds every session — with its link, agenda, trainer and reminder — to your Outlook Calendar.
+          One click registers you for the whole programme and creates the meetings. Each session has its own Outlook calendar download with its meeting link, agenda, trainer and reminder.
         </p>
       )}
       {error && <p className="rounded-lg bg-crit/10 px-3 py-2 text-xs font-medium text-crit">{error}</p>}
@@ -92,8 +87,8 @@ export default function NotifyMe({
           </div>
           <ul className="mt-3 space-y-1.5 text-[13px] text-ink2">
             <li>✓ Confirmation email sent to your inbox</li>
-            <li>✓ Outlook calendar invitation downloaded — it contains one entry per session, each with its meeting link, agenda, trainer and reminder</li>
             {result.meetingLink && <li>✓ Meetings created automatically for every online session</li>}
+            <li>✓ Add each session to your calendar with its <span className="font-semibold">Outlook</span> button in the sessions list above</li>
           </ul>
           {result.meetingLink && (
             <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -110,9 +105,6 @@ export default function NotifyMe({
               >
                 <Copy size={14} /> {copied ? "Copied!" : "Copy link"}
               </button>
-              <a href={result.icsUrl} className="inline-flex items-center gap-2 rounded-xl border border-line px-4 py-2.5 text-sm font-semibold text-ink2 transition hover:bg-surface2">
-                <CalendarPlus size={14} /> Download invite again
-              </a>
             </div>
           )}
         </div>
