@@ -1,32 +1,64 @@
-/** CDC Türkiye brand mark — a mosaic pinwheel of coloured squares. */
-export function TopMark({ size = 36 }: { size?: number }) {
+/* CDC Türkiye brand assets. Colours taken from the official logo. */
+
+const C = {
+  teal: "#35B0A7",
+  orange: "#F0952A",
+  red: "#E2574C",
+  navy: "#17375E",
+  blue: "#4AA3D5",
+  yellow: "#F2C14E",
+};
+
+/** The mosaic mark — a loose scatter of tilted coloured squares. */
+export function TopMark({ size = 40 }: { size?: number }) {
+  // Each tile: [x, y, side, rotationDeg, colour]
+  const tiles: [number, number, number, number, string][] = [
+    [20, 2, 10, 12, C.teal],
+    [32, 6, 8, -8, C.orange],
+    [30, 17, 9, 18, C.navy],
+    [8, 10, 9, -14, C.blue],
+    [19, 14, 9, 6, C.red],
+    [10, 22, 8, 20, C.yellow],
+    [21, 26, 8, -10, C.teal],
+    [32, 27, 7, 14, C.blue],
+    [3, 20, 7, 8, C.orange],
+  ];
   return (
-    <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true">
-      <g transform="rotate(45 24 24)">
-        <rect x="19.5" y="4" width="9" height="9" fill="#F59E2D" />
-        <rect x="30.5" y="9" width="8" height="8" fill="#31B7AF" />
-        <rect x="34" y="19.5" width="9" height="9" fill="#2D9CDB" />
-        <rect x="30.5" y="30.5" width="8" height="8" fill="#0B2F5E" />
-        <rect x="19.5" y="34" width="9" height="9" fill="#E2574C" />
-        <rect x="9" y="30.5" width="8" height="8" fill="#F59E2D" />
-        <rect x="5" y="19.5" width="9" height="9" fill="#31B7AF" />
-        <rect x="9" y="9" width="8" height="8" fill="#0B2F5E" />
-        <rect x="19" y="19" width="10" height="10" fill="#2D9CDB" />
-      </g>
+    <svg width={size} height={size} viewBox="0 0 44 40" aria-hidden="true">
+      {tiles.map(([x, y, s, r, fill], i) => (
+        <rect key={i} x={x} y={y} width={s} height={s} rx={1} fill={fill} transform={`rotate(${r} ${x + s / 2} ${y + s / 2})`} />
+      ))}
     </svg>
   );
 }
 
-/** Full logo: mark + "CDC Türkiye" wordmark + portal name. */
+/** Full CDC Türkiye lockup for use on a light/white surface. */
+export function CdcLogo({ height = 56 }: { height?: number }) {
+  return (
+    <span className="flex items-center gap-3" style={{ height }}>
+      <span className="leading-none">
+        <span className="block text-[2.1em] font-extrabold leading-[0.9] tracking-tight" style={{ color: C.navy, fontSize: height * 0.46 }}>
+          CDC
+        </span>
+        <span className="block font-semibold leading-none" style={{ color: C.blue, fontSize: height * 0.34 }}>
+          Türkiye
+        </span>
+      </span>
+      <TopMark size={height * 0.72} />
+    </span>
+  );
+}
+
+/** Compact logo for the sidebar (mark + stacked wordmark + portal name). */
 export function TopLogo({ compact = false }: { compact?: boolean }) {
   return (
     <span className="flex items-center gap-2.5">
-      <TopMark size={36} />
+      <TopMark size={38} />
       {!compact && (
         <span className="leading-tight">
           <span className="block text-[15px] font-extrabold tracking-tight">
-            <span className="text-brand">CDC</span>{" "}
-            <span className="text-primary">Türkiye</span>
+            <span style={{ color: C.navy }} className="dark:!text-[#cfe0f7]">CDC</span>{" "}
+            <span style={{ color: C.blue }}>Türkiye</span>
           </span>
           <span className="block text-[11px] font-medium text-ink3">TOP Portal</span>
         </span>

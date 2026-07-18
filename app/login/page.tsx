@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, Loader2 } from "lucide-react";
-import { TopMark } from "@/components/logo";
+import { CdcLogo } from "@/components/logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,12 +35,12 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-navy via-[#00247e] to-[#0053b8] p-4 dark:from-[#040a1c] dark:via-[#081538] dark:to-[#0a2050]">
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-2 shadow-lg">
-            <TopMark size={44} />
+          <span className="flex items-center justify-center rounded-2xl bg-white px-6 py-4 shadow-lg">
+            <CdcLogo height={56} />
           </span>
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-white">CDC <span className="text-blue-300">Türkiye</span></h1>
-            <p className="text-sm font-medium text-blue-200">TOP Portal — Training Organizing & Planning</p>
+            <h1 className="text-xl font-extrabold tracking-tight text-white">TOP Portal</h1>
+            <p className="text-sm font-medium text-blue-200">Training Organizing &amp; Planning</p>
           </div>
         </div>
 
