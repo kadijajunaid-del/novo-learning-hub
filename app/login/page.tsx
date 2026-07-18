@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, Loader2 } from "lucide-react";
-import { CdcLogo } from "@/components/logo";
+import BrandLogo from "@/components/brand-logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -36,7 +36,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
           <span className="flex items-center justify-center rounded-2xl bg-white px-6 py-4 shadow-lg">
-            <CdcLogo height={56} />
+            <BrandLogo height={56} />
           </span>
           <div>
             <h1 className="text-xl font-extrabold tracking-tight text-white">TOP Portal</h1>
