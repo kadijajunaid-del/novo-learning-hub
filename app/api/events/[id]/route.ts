@@ -4,7 +4,7 @@ import { getSessionUser } from "@/lib/auth";
 import { generateMeetingLink } from "@/lib/meetings";
 import { normalizeSessions } from "@/lib/sessions";
 import { syncEventFromSessions, eventSessions } from "@/lib/queries";
-import { visibilityFields } from "@/lib/visibility";
+import { visibilityFields, notifyNewTraining } from "@/lib/visibility";
 import { uid } from "@/lib/format";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -39,12 +39,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         : s,
     );
     syncEventFromSessions(event);
-    db.notifications.unshift({
-      id: uid("nt"), to: "trainees",
-      title: `New training: ${event.title}`,
-      body: `A programme with ${event.sessions.length} session${event.sessions.length === 1 ? "" : "s"} is open for registration, starting ${event.date}.`,
-      kind: "event", at: new Date().toISOString(), readBy: [],
-    });
+    if (event.sessions.length) notifyNewTraining(db, event);
     audit(db, user.name, "event.published", event.title);
   } else if (action === "complete") {
     event.status = "completed";
@@ -69,10 +64,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     for (const k of editable) {
       if (k in body) (event as any)[k] = body[k];
     }
-    if ("visibleBatches" in body) {
-      const { visibility, visibleBatches } = visibilityFields(body, db.settings.batches);
+    if ("visibleBatches" in body || "visibleTrainees" in body) {
+      const { visibility, visibleBatches, visibleTrainees } = visibilityFields(body, db.settings.batches, db.users.filter((u) => u.role === "trainee").map((u) => u.id));
       event.visibility = visibility;
       event.visibleBatches = visibleBatches;
+      event.visibleTrainees = visibleTrainees;
     }
     event.maxParticipants = Number(event.maxParticipants) || 25;
     const trainerIds = new Set(db.users.filter((u) => u.role === "trainer").map((u) => u.id));

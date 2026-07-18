@@ -84,9 +84,10 @@ export function trainerCanSee(e: TrainingEvent, trainerId: string): boolean {
 /** Batch visibility: an event with visibleBatches is shown only to trainees in
  *  those batches; an empty list means everyone. Trainers/admins see all. */
 export function visibleToTrainee(e: TrainingEvent, user: User): boolean {
-  const batches = e.visibleBatches;
-  if (Array.isArray(batches) && batches.length) {
-    return batches.includes(user.batch ?? "");
+  const batches = e.visibleBatches ?? [];
+  const trainees = e.visibleTrainees ?? [];
+  if (batches.length || trainees.length) {
+    return batches.includes(user.batch ?? "") || trainees.includes(user.id);
   }
   // Backward compatibility with the old single-string visibility field.
   const v = e.visibility || "Everyone";

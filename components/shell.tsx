@@ -19,7 +19,7 @@ const NAV: Record<string, { href: string; label: string; icon: any }[]> = {
     { href: "/calendar", label: "Calendar", icon: CalendarDays },
     { href: "/trainers", label: "Trainers", icon: Users },
     { href: "/team-leaders", label: "Team Leaders", icon: UserCog },
-    { href: "/batches", label: "Batches", icon: Layers },
+    { href: "/batches", label: "Team Structure", icon: Layers },
     { href: "/trainees", label: "Trainees", icon: GraduationCap },
     { href: "/reports", label: "Reports", icon: BarChart3 },
     { href: "/notifications", label: "Notifications", icon: Bell },
@@ -40,7 +40,6 @@ const NAV: Record<string, { href: string; label: string; icon: any }[]> = {
   ],
   trainee: [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/events", label: "Trainings", icon: BookOpen },
     { href: "/calendar", label: "Calendar", icon: CalendarDays },
     { href: "/notifications", label: "Notifications", icon: Bell },
   ],

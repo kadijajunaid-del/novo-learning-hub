@@ -32,6 +32,7 @@ export default function EventForm({
   departments,
   trainerName,
   trainers,
+  allTrainees,
   existing,
 }: {
   categories: string[];
@@ -42,6 +43,8 @@ export default function EventForm({
   trainerName: string;
   /** Provided for admins only — lets them assign the event to a trainer. */
   trainers?: { id: string; name: string }[];
+  /** For "individual trainees" visibility. */
+  allTrainees?: { id: string; name: string; batch: string }[];
   existing?: TrainingEvent;
 }) {
   const router = useRouter();
@@ -60,7 +63,12 @@ export default function EventForm({
     validFrom: existing?.validFrom ?? "",
     validUntil: existing?.validUntil ?? "",
   });
+  const initialMode: "everyone" | "batches" | "trainees" =
+    existing?.visibleTrainees?.length ? "trainees" : existing?.visibleBatches?.length ? "batches" : "everyone";
+  const [visibilityMode, setVisibilityMode] = useState<"everyone" | "batches" | "trainees">(initialMode);
   const [visibleBatches, setVisibleBatches] = useState<string[]>(existing?.visibleBatches ?? []);
+  const [visibleTrainees, setVisibleTrainees] = useState<string[]>(existing?.visibleTrainees ?? []);
+  const [traineeQuery, setTraineeQuery] = useState("");
   const [allowTrainerSessions, setAllowTrainerSessions] = useState(existing?.allowTrainerSessions ?? false);
   const [assignedTrainerIds, setAssignedTrainerIds] = useState<string[]>(existing?.assignedTrainerIds ?? []);
   const toggleAssigned = (id: string) =>
@@ -112,7 +120,8 @@ export default function EventForm({
       agenda: f.agenda.split("\n").map((s) => s.trim()).filter(Boolean),
       materials,
       sessions,
-      visibleBatches,
+      visibleBatches: visibilityMode === "batches" ? visibleBatches : [],
+      visibleTrainees: visibilityMode === "trainees" ? visibleTrainees : [],
       allowTrainerSessions,
       assignedTrainerIds,
       status,
@@ -320,35 +329,80 @@ export default function EventForm({
         <div className="sm:col-span-2">
           <label className={labelCls}>Visible to</label>
           <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => setVisibleBatches([])}
-              className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
-                visibleBatches.length === 0 ? "border-primary bg-primary text-white" : "border-line text-ink2 hover:bg-surface2"
-              }`}
-            >
-              {visibleBatches.length === 0 ? "✓ " : ""}Everyone
-            </button>
-            {batches.map((b) => {
-              const on = visibleBatches.includes(b);
-              return (
-                <button
-                  key={b}
-                  type="button"
-                  onClick={() => setVisibleBatches((prev) => (prev.includes(b) ? prev.filter((x) => x !== b) : [...prev, b]))}
-                  className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
-                    on ? "border-primary bg-primary text-white" : "border-line text-ink2 hover:bg-surface2"
-                  }`}
-                >
-                  {on ? "✓ " : ""}{b}
-                </button>
-              );
-            })}
+            {([
+              ["everyone", "Everyone"],
+              ["batches", "Specific batches"],
+              ["trainees", "Individual trainees"],
+            ] as const).map(([mode, lbl]) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setVisibilityMode(mode)}
+                className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
+                  visibilityMode === mode ? "border-primary bg-primary text-white" : "border-line text-ink2 hover:bg-surface2"
+                }`}
+              >
+                {visibilityMode === mode ? "✓ " : ""}{lbl}
+              </button>
+            ))}
           </div>
+
+          {visibilityMode === "batches" && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {batches.map((b) => {
+                const on = visibleBatches.includes(b);
+                return (
+                  <button
+                    key={b}
+                    type="button"
+                    onClick={() => setVisibleBatches((prev) => (prev.includes(b) ? prev.filter((x) => x !== b) : [...prev, b]))}
+                    className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
+                      on ? "border-primary bg-primary text-white" : "border-line text-ink2 hover:bg-surface2"
+                    }`}
+                  >
+                    {on ? "✓ " : ""}{b}
+                  </button>
+                );
+              })}
+              {!batches.length && <span className="text-xs text-ink3">No batches configured.</span>}
+            </div>
+          )}
+
+          {visibilityMode === "trainees" && (
+            <div className="mt-3 rounded-xl border border-line bg-surface2/40 p-3">
+              <input
+                className={`${inputCls} mb-2`}
+                placeholder="Search trainees by name…"
+                value={traineeQuery}
+                onChange={(e) => setTraineeQuery(e.target.value)}
+              />
+              <div className="max-h-52 space-y-1 overflow-y-auto pr-1">
+                {(allTrainees ?? [])
+                  .filter((t) => !traineeQuery || t.name.toLowerCase().includes(traineeQuery.toLowerCase()))
+                  .map((t) => {
+                    const on = visibleTrainees.includes(t.id);
+                    return (
+                      <label key={t.id} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 transition hover:bg-surface">
+                        <input
+                          type="checkbox"
+                          checked={on}
+                          onChange={() => setVisibleTrainees((prev) => (prev.includes(t.id) ? prev.filter((x) => x !== t.id) : [...prev, t.id]))}
+                          className="h-4 w-4 shrink-0 accent-[var(--primary)]"
+                        />
+                        <span className="min-w-0 flex-1 truncate text-sm text-ink">{t.name}</span>
+                        {t.batch && <span className="shrink-0 rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-semibold text-primary-strong dark:text-primary">{t.batch}</span>}
+                      </label>
+                    );
+                  })}
+                {!(allTrainees ?? []).length && <p className="py-2 text-center text-xs text-ink3">No trainees available.</p>}
+              </div>
+            </div>
+          )}
+
           <p className="mt-1.5 text-[11px] leading-relaxed text-ink3">
-            {visibleBatches.length === 0
-              ? "All trainees can see this event."
-              : `Only trainees in ${visibleBatches.length === 1 ? "this batch" : "these batches"} will see it.`}
+            {visibilityMode === "everyone" && "All trainees can see this event."}
+            {visibilityMode === "batches" && (visibleBatches.length ? `Only trainees in ${visibleBatches.length === 1 ? "this batch" : "these batches"} will see it.` : "Select at least one batch.")}
+            {visibilityMode === "trainees" && (visibleTrainees.length ? `Only the ${visibleTrainees.length} selected trainee${visibleTrainees.length === 1 ? "" : "s"} will see it.` : "Select at least one trainee.")}
           </p>
         </div>
         <div className="sm:col-span-2">

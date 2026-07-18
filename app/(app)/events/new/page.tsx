@@ -35,6 +35,7 @@ export default async function NewEventPage() {
         departments={db.settings.departments}
         trainerName={user.name}
         trainers={user.role === "admin" ? db.users.filter((u) => u.role === "trainer" && u.active).map((t) => ({ id: t.id, name: t.name })) : undefined}
+        allTrainees={db.users.filter((u) => u.role === "trainee" && u.active).map((t) => ({ id: t.id, name: t.name, batch: t.batch ?? "" }))}
       />
     </div>
   );

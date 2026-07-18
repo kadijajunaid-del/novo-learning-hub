@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   CalendarDays, CalendarCheck2, Users, GraduationCap, CheckCircle2, Hourglass,
-  ClipboardList, Star, Percent, Bell, Activity, TrendingUp, Sparkles, Plus,
+  ClipboardList, Star, Percent, Bell, Activity, TrendingUp, Plus,
 } from "lucide-react";
 import { getDb } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
@@ -229,49 +229,39 @@ function TrainerDashboard({ db, user }: { db: DB; user: User }) {
 
 function TraineeDashboard({ db, user }: { db: DB; user: User }) {
   const myRegs = db.registrations.filter((r) => r.userId === user.id);
-  const myEventIds = myRegs.map((r) => r.eventId);
-  const registeredUpcoming = db.events.filter((e) => myEventIds.includes(e.id) && isUpcoming(e));
-  const history = db.events.filter((e) => myEventIds.includes(e.id) && (e.status === "completed" || e.date < todayISO()));
+  const myEventIds = new Set(myRegs.map((r) => r.eventId));
+  // Trainings assigned to this trainee: published events visible to them.
+  const assigned = db.events
+    .filter((e) => e.status === "published" && visibleToTrainee(e, user) && isUpcoming(e))
+    .sort((a, b) => (a.date > b.date ? 1 : -1));
+  const registeredUpcoming = assigned.filter((e) => myEventIds.has(e.id));
+  const history = db.events.filter((e) => myEventIds.has(e.id) && (e.status === "completed" || e.date < todayISO()));
   const attended = myRegs.filter((r) => r.attended === true).length;
   const decided = myRegs.filter((r) => r.attended !== null).length;
   const progress = decided ? Math.round((attended / decided) * 100) : 0;
-  const recommended = db.events
-    .filter((e) => isUpcoming(e) && !myEventIds.includes(e.id) && visibleToTrainee(e, user))
-    .slice(0, 3);
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
-        <StatCard href="/calendar" label="Upcoming trainings" value={registeredUpcoming.length} icon={<CalendarDays size={19} />} accent="var(--s1)" sub="You are registered" />
-        <StatCard href="/events" label="Total registrations" value={myRegs.length} icon={<ClipboardList size={19} />} accent="#001965" />
-        <StatCard href="/events" label="Completion rate" value={`${progress}%`} icon={<TrendingUp size={19} />} accent="var(--s2)" sub={`${attended} of ${decided || "0"} attended`} />
+        <StatCard href="/calendar" label="Assigned trainings" value={assigned.length} icon={<CalendarDays size={19} />} accent="var(--s1)" sub={`${registeredUpcoming.length} registered`} />
+        <StatCard label="Total registrations" value={myRegs.length} icon={<ClipboardList size={19} />} accent="#001965" />
+        <StatCard label="Completion rate" value={`${progress}%`} icon={<TrendingUp size={19} />} accent="var(--s2)" sub={`${attended} of ${decided || "0"} attended`} />
       </div>
 
       <div>
         <SectionHeader
-          title="Your upcoming trainings"
-          sub="Sessions you registered for"
-          action={<Link href="/events" className="text-xs font-semibold text-primary hover:underline">Browse catalogue</Link>}
+          title="Your trainings"
+          sub="Trainings assigned to you — press Notify Me on any to register"
         />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {registeredUpcoming.map((e) => (
-            <EventCard key={e.id} event={e} trainer={db.users.find((u) => u.id === e.trainerId)} registered seatsTaken={regsFor(db, e.id).length} />
+          {assigned.map((e) => (
+            <EventCard key={e.id} event={e} trainer={db.users.find((u) => u.id === e.trainerId)} registered={myEventIds.has(e.id)} seatsTaken={regsFor(db, e.id).length} />
           ))}
-          {!registeredUpcoming.length && (
+          {!assigned.length && (
             <div className="md:col-span-2 xl:col-span-3">
-              <EmptyState icon={<CalendarDays size={22} />} title="Nothing booked yet" sub="Browse the catalogue and press Notify Me on any published training to register." />
+              <EmptyState icon={<CalendarDays size={22} />} title="No trainings assigned yet" sub="When a training is assigned to you or your batch, it will appear here." />
             </div>
           )}
-        </div>
-      </div>
-
-      <div>
-        <SectionHeader title="Recommended for you" sub="Popular sessions with open seats — powered by your onboarding profile" />
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {recommended.map((e) => (
-            <EventCard key={e.id} event={e} trainer={db.users.find((u) => u.id === e.trainerId)} seatsTaken={regsFor(db, e.id).length} />
-          ))}
-          {!recommended.length && <EmptyState icon={<Sparkles size={22} />} title="You're registered for everything!" />}
         </div>
       </div>
 

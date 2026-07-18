@@ -24,10 +24,8 @@ export default async function CalendarPage() {
   // One calendar entry per session, labelled "Sn/N" for multi-session programmes.
   const payload: CalEvent[] = events.flatMap((e) => {
     let sessions = eventSessions(e);
-    // Owners and assigned trainers see all sessions; a lone session-trainer
-    // (only delivering one session) sees just their own.
-    const seesAll = e.trainerId === user.id || (e.assignedTrainerIds ?? []).includes(user.id);
-    if (user.role === "trainer" && !seesAll) {
+    // Trainers see only the sessions assigned to them.
+    if (user.role === "trainer") {
       sessions = sessions.filter((s) => s.trainerId === user.id);
     }
     const total = eventSessions(e).length;

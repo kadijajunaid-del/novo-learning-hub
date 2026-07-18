@@ -3,7 +3,7 @@ import { getDb, saveDb, audit } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { normalizeSessions } from "@/lib/sessions";
 import { syncEventFromSessions } from "@/lib/queries";
-import { visibilityFields } from "@/lib/visibility";
+import { visibilityFields, notifyNewTraining } from "@/lib/visibility";
 import { uid } from "@/lib/format";
 import type { TrainingEvent } from "@/lib/types";
 
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
     instructions: body.instructions || "",
     reminder: body.reminder || "1 hour",
     repeat: body.repeat || "None",
-    ...visibilityFields(body, db.settings.batches),
+    ...visibilityFields(body, db.settings.batches, db.users.filter((u) => u.role === "trainee").map((u) => u.id)),
     validFrom: typeof body.validFrom === "string" ? body.validFrom : "",
     validUntil: typeof body.validUntil === "string" ? body.validUntil : "",
     allowTrainerSessions,
@@ -71,15 +71,7 @@ export async function POST(req: Request) {
 
   db.events.push(event);
   if (event.status === "published" && event.sessions.length) {
-    db.notifications.unshift({
-      id: uid("nt"),
-      to: "trainees",
-      title: `New training: ${event.title}`,
-      body: `A new programme with ${event.sessions.length} session${event.sessions.length === 1 ? "" : "s"} starts on ${event.date}. Seats are limited to ${event.maxParticipants} — register now.`,
-      kind: "event",
-      at: new Date().toISOString(),
-      readBy: [],
-    });
+    notifyNewTraining(db, event);
   }
   // Let assigned trainers know they can add their sessions.
   for (const tid of assignedTrainerIds) {

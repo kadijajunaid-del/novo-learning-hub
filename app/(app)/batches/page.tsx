@@ -21,8 +21,8 @@ export default async function BatchesPage() {
   return (
     <div className="mx-auto max-w-6xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-extrabold tracking-tight text-brand">Batches</h1>
-        <p className="mt-1 text-sm text-ink3">Create trainee batches, assign a team leader to each, and add trainees.</p>
+        <h1 className="text-2xl font-extrabold tracking-tight text-brand">Team Structure</h1>
+        <p className="mt-1 text-sm text-ink3">Create batches, assign a team leader to each, and add trainees.</p>
       </div>
       <BatchManager
         batches={rows}

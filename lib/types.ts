@@ -58,9 +58,12 @@ export interface TrainingEvent {
   instructions: string;
   reminder: string; // "15 mins" | "30 mins" | "1 hour" | "1 day"
   repeat: string; // "None" | "Daily" | "Weekly" | "Monthly" | "Custom"
-  visibility: string; // human label: "Everyone" or "Batches: A, B"
-  /** Batches allowed to see this event. Empty = everyone. */
+  visibility: string; // human label: "Everyone", "Batches: A, B" or "Selected trainees"
+  /** Batches allowed to see this event. */
   visibleBatches?: string[];
+  /** Individual trainees allowed to see this event. */
+  visibleTrainees?: string[];
+  // Empty batches AND empty trainees = everyone.
   /** Registration window. Empty string = no restriction. */
   validFrom: string; // YYYY-MM-DD
   validUntil: string; // YYYY-MM-DD

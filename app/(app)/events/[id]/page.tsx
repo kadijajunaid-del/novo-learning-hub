@@ -44,7 +44,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
     const u = db.users.find((x) => x.id === r.userId);
     return { userId: r.userId, name: u?.name ?? "Unknown", department: u?.department ?? "", attended: r.attended };
   });
-  const sessions = eventSessions(event);
+  // Trainers see only the sessions assigned to them; everyone else sees all.
+  const allSessions = eventSessions(event);
+  const sessions = user.role === "trainer" ? allSessions.filter((s) => s.trainerId === user.id) : allSessions;
   const today = todayISO();
 
   return (
@@ -74,8 +76,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
           <div className="space-y-7 lg:col-span-2">
             {/* key facts */}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              <Fact icon={<CalendarDays size={16} />} label="Starts" value={fmtDate(sessions[0].date)} />
-              <Fact icon={<ListChecks size={16} />} label="Sessions" value={`${sessions.length} session${sessions.length === 1 ? "" : "s"}`} />
+              <Fact icon={<CalendarDays size={16} />} label="Starts" value={sessions.length ? fmtDate(sessions[0].date) : "—"} />
+              <Fact icon={<ListChecks size={16} />} label={user.role === "trainer" ? "My sessions" : "Sessions"} value={`${sessions.length} session${sessions.length === 1 ? "" : "s"}`} />
               <Fact icon={<Globe2 size={16} />} label="Time zone" value={event.timeZone} />
               <Fact icon={<Users size={16} />} label="Seats" value={`${regs.length} / ${event.maxParticipants}`} />
               <Fact icon={<BellRing size={16} />} label="Reminder" value={`${event.reminder} before each session`} />
