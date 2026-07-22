@@ -37,6 +37,7 @@ export default function AddSession({
     endTime: "11:00",
     platform: "Microsoft Teams",
     venue: "",
+    meetingLink: "",
   });
   const set = (k: string) => (e: React.ChangeEvent<any>) => setF((p) => ({ ...p, [k]: e.target.value }));
   const online = f.platform !== "Physical Meeting";
@@ -117,10 +118,15 @@ export default function AddSession({
                   </select>
                 </div>
               </div>
-              {!online && (
+              {!online ? (
                 <div>
                   <label className={labelCls}>Venue *</label>
                   <input className={inputCls} value={f.venue} onChange={set("venue")} placeholder="e.g. HQ Training Room 2" />
+                </div>
+              ) : (
+                <div>
+                  <label className={labelCls}>Meeting link <span className="font-normal text-ink3">(optional — paste a dedicated {f.platform} link, or leave blank to auto-generate)</span></label>
+                  <input className={inputCls} value={f.meetingLink} onChange={set("meetingLink")} placeholder="https://…" />
                 </div>
               )}
               {error && <p className="rounded-lg bg-crit/10 px-3 py-2 text-xs font-medium text-crit">{error}</p>}

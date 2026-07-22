@@ -289,6 +289,12 @@ export default function EventForm({
                         <input className={inputCls} value={s.venue} onChange={setSession(i, "venue")} placeholder="e.g. HQ Training Room 2" />
                       </div>
                     )}
+                    {online && (
+                      <div className="sm:col-span-4">
+                        <label className={labelCls}>Meeting link <span className="font-normal text-ink3">(optional — paste a dedicated {s.platform} link, or leave blank to auto-generate)</span></label>
+                        <input className={inputCls} value={s.meetingLink ?? ""} onChange={setSession(i, "meetingLink")} placeholder={`https://…`} />
+                      </div>
+                    )}
                   </div>
                 </div>
               );

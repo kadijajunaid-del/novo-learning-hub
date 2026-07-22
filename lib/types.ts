@@ -34,6 +34,10 @@ export interface EventSession {
   platform: Platform;
   venue: string;
   meetingLink: string;
+  /** The session trainer has accepted to deliver this session. */
+  accepted?: boolean;
+  /** The session has been delivered / marked completed by its trainer. */
+  completed?: boolean;
 }
 
 export interface TrainingEvent {

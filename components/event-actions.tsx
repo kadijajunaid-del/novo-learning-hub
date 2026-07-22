@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, Copy, Loader2, Pencil, Send, XCircle } from "lucide-react";
 
-export default function EventActions({ eventId, status }: { eventId: string; status: string }) {
+export default function EventActions({ eventId, status, isAdmin }: { eventId: string; status: string; isAdmin: boolean }) {
   const router = useRouter();
   const [busy, setBusy] = useState("");
   const [confirmCancel, setConfirmCancel] = useState(false);
@@ -43,9 +43,9 @@ export default function EventActions({ eventId, status }: { eventId: string; sta
       <button onClick={() => act("duplicate")} disabled={!!busy} className={btn}>
         {busy === "duplicate" ? <Loader2 size={15} className="animate-spin" /> : <Copy size={14} />} Duplicate
       </button>
-      {status === "published" && (
-        <button onClick={() => act("complete")} disabled={!!busy} className={btn}>
-          {busy === "complete" ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={14} className="text-ok" />} Mark completed
+      {status === "published" && isAdmin && (
+        <button onClick={() => act("complete")} disabled={!!busy} className={btn} title="Marks the whole programme completed">
+          {busy === "complete" ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={14} className="text-ok" />} Mark event completed
         </button>
       )}
       {status === "published" && !confirmCancel && (

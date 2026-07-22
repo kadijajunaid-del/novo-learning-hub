@@ -13,6 +13,43 @@ function canAddSession(event: any, user: any): boolean {
   return Boolean(event.allowTrainerSessions) && (event.assignedTrainerIds ?? []).includes(user.id);
 }
 
+// Accept-to-deliver / mark-complete a single session. The session's trainer
+// (or an admin/owner) may do this.
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const user = await getSessionUser();
+  if (!user) return NextResponse.json({ error: "Not signed in." }, { status: 401 });
+
+  const db = await getDb();
+  const event = db.events.find((e) => e.id === id);
+  if (!event) return NextResponse.json({ error: "Event not found." }, { status: 404 });
+
+  const { sessionId, action } = await req.json();
+  const session = (event.sessions ?? []).find((s) => s.id === sessionId);
+  if (!session) return NextResponse.json({ error: "Session not found." }, { status: 404 });
+
+  const isOwnerOrAdmin = user.role === "admin" || event.trainerId === user.id;
+  if (!isOwnerOrAdmin && session.trainerId !== user.id) {
+    return NextResponse.json({ error: "You can only update your own session." }, { status: 403 });
+  }
+
+  if (action === "accept") session.accepted = true;
+  else if (action === "decline") { session.accepted = false; session.completed = false; }
+  else if (action === "complete") { session.accepted = true; session.completed = true; }
+  else if (action === "reopen") session.completed = false;
+  else return NextResponse.json({ error: "Unknown action." }, { status: 400 });
+
+  // When every session is completed, the whole event is completed.
+  const all = event.sessions ?? [];
+  if (all.length && all.every((s) => s.completed)) event.status = "completed";
+  else if (event.status === "completed") event.status = "published";
+
+  syncEventFromSessions(event);
+  audit(db, user.name, `session.${action}`, `${event.title} — ${session.name}`);
+  await saveDb(db);
+  return NextResponse.json({ ok: true });
+}
+
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const user = await getSessionUser();

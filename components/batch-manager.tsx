@@ -75,7 +75,7 @@ export default function BatchManager({
             <input
               autoFocus
               className={`${inputCls} !w-64`}
-              placeholder="Batch name, e.g. 2026-Q4 New Hires"
+              placeholder="Team name, e.g. Clinical Ops Q4"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && create()}
@@ -87,7 +87,7 @@ export default function BatchManager({
           </div>
         ) : (
           <button onClick={() => setCreating(true)} className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-strong">
-            <Plus size={16} /> Create batch
+            <Plus size={16} /> Create a team
           </button>
         )}
       </div>
@@ -182,7 +182,7 @@ export default function BatchManager({
                         </div>
                       </>
                     ) : (
-                      <p className="py-2 text-center text-xs text-ink3">No other trainees to add — everyone is already in this batch.</p>
+                      <p className="py-2 text-center text-xs text-ink3">No other trainees to add — everyone is already in this team.</p>
                     )}
                   </div>
                 );

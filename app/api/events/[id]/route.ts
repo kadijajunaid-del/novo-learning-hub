@@ -42,6 +42,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (event.sessions.length) notifyNewTraining(db, event);
     audit(db, user.name, "event.published", event.title);
   } else if (action === "complete") {
+    if (user.role !== "admin") {
+      return NextResponse.json({ error: "Only an administrator can complete the whole event. Trainers complete their own sessions." }, { status: 403 });
+    }
     event.status = "completed";
     audit(db, user.name, "event.completed", event.title);
   } else if (action === "duplicate") {

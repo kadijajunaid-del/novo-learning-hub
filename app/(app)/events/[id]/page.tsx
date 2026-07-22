@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft, CalendarDays, Clock, Download, FileText, Globe2, Info, ListChecks,
-  MapPin, Star, Users, Video, Repeat, Eye, BellRing,
+  MapPin, Star, Users, Video, Repeat, Eye, BellRing, UserRound,
 } from "lucide-react";
 import { getDb } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
@@ -13,6 +13,7 @@ import AttendancePanel from "@/components/attendance-panel";
 import FeedbackForm from "@/components/feedback-form";
 import { regsFor, eventRating, eventSessions, visibleToTrainee } from "@/lib/queries";
 import SessionIcs from "@/components/session-ics";
+import SessionStatus from "@/components/session-status";
 import AddSession from "@/components/add-session";
 import { fmtDate, fmtTime, todayISO } from "@/lib/format";
 
@@ -107,7 +108,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                         <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-ink">
                           {s.name || `Session ${i + 1}`}
                           {isToday && <Badge tone="blue">Today</Badge>}
-                          {isPast && event.status !== "cancelled" && <Badge tone="green">Done</Badge>}
+                          {s.completed && <Badge tone="green">Completed</Badge>}
+                          {!s.completed && isPast && event.status !== "cancelled" && <Badge tone="gray">Past</Badge>}
                         </div>
                         <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink2">
                           <span className="inline-flex items-center gap-1.5"><CalendarDays size={12} className="text-ink3" /> {fmtDate(s.date)}</span>
@@ -117,7 +119,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                             {s.platform === "Physical Meeting" ? s.venue : s.platform}
                           </span>
                           <span className="inline-flex items-center gap-1.5 font-medium text-ink3">
-                            {db.users.find((u) => u.id === s.trainerId)?.name ?? trainer?.name ?? "—"}
+                            <UserRound size={12} /> {db.users.find((u) => u.id === s.trainerId)?.name ?? trainer?.name ?? "—"}
                           </span>
                           {s.category && (
                             <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-semibold text-primary-strong dark:text-primary">
@@ -125,6 +127,16 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                             </span>
                           )}
                         </div>
+                        {/* delivery status */}
+                        {event.status !== "cancelled" && (user.role === "trainer" || canManage) && (
+                          <div className="mt-2">
+                            {user.role === "trainer" && s.trainerId === user.id ? (
+                              <SessionStatus eventId={event.id} sessionId={s.id} accepted={!!s.accepted} completed={!!s.completed} mode="trainer" />
+                            ) : (
+                              <SessionStatus eventId={event.id} sessionId={s.id} accepted={!!s.accepted} completed={!!s.completed} mode="view" />
+                            )}
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         {s.meetingLink && (registered || canManage || isAssignedTrainer) && (
@@ -242,26 +254,52 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
               {user.role === "trainee" && event.status === "cancelled" && (
                 <p className="rounded-xl bg-crit/10 px-4 py-3 text-sm font-medium text-crit">This event was cancelled. Registered participants have been notified.</p>
               )}
-              {canManage && <EventActions eventId={event.id} status={event.status} />}
+              {canManage && <EventActions eventId={event.id} status={event.status} isAdmin={user.role === "admin"} />}
             </section>
           </div>
 
           {/* sidebar */}
           <aside className="space-y-5">
-            {trainer && (
-              <Card className="p-5">
-                <div className="mb-3 text-[11px] font-bold uppercase tracking-wide text-ink3">Trainer</div>
-                <div className="flex items-center gap-3">
-                  <Avatar name={trainer.name} size={46} />
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-bold text-ink">{trainer.name}</div>
-                    <div className="truncate text-xs text-ink3">{trainer.title}</div>
-                    <div className="truncate text-xs text-ink3">{trainer.department}</div>
+            {(() => {
+              // Distinct trainers across all sessions, each with their session
+              // count and combined delivery status.
+              const ids = [...new Set(allSessions.map((s) => s.trainerId).filter(Boolean))];
+              if (!ids.length) return null;
+              return (
+                <Card className="p-5">
+                  <div className="mb-3 text-[11px] font-bold uppercase tracking-wide text-ink3">
+                    Trainer{ids.length === 1 ? "" : "s"} ({ids.length})
                   </div>
-                </div>
-                <a href={`mailto:${trainer.email}`} className="mt-3 block truncate text-xs font-medium text-primary hover:underline">{trainer.email}</a>
-              </Card>
-            )}
+                  <ul className="space-y-3">
+                    {ids.map((tid) => {
+                      const tu = db.users.find((u) => u.id === tid);
+                      if (!tu) return null;
+                      const mySessions = allSessions.filter((s) => s.trainerId === tid);
+                      const done = mySessions.filter((s) => s.completed).length;
+                      const accepted = mySessions.filter((s) => s.accepted).length;
+                      const statusTxt = done === mySessions.length ? "All delivered" : accepted ? `${accepted}/${mySessions.length} accepted` : "Not yet accepted";
+                      const statusTone = done === mySessions.length ? "green" : accepted ? "blue" : "gray";
+                      return (
+                        <li key={tid} className="flex items-start gap-3">
+                          <Avatar name={tu.name} size={38} />
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-sm font-bold text-ink">{tu.name}</div>
+                            <div className="truncate text-xs text-ink3">{tu.title} · {tu.department}</div>
+                            <a href={`mailto:${tu.email}`} className="block truncate text-xs font-medium text-primary hover:underline">{tu.email}</a>
+                            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                              <span className="rounded-full bg-surface2 px-2 py-0.5 text-[10px] font-semibold text-ink2">{mySessions.length} session{mySessions.length === 1 ? "" : "s"}</span>
+                              {(user.role === "admin" || (user.role === "trainer" && event.trainerId === user.id)) && (
+                                <Badge tone={statusTone}>{statusTxt}</Badge>
+                              )}
+                            </div>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </Card>
+              );
+            })()}
 
             <Card className="p-5">
               <div className="mb-3 flex items-center justify-between">
