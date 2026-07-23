@@ -49,20 +49,18 @@ export function CdcLogo({ height = 56 }: { height?: number }) {
   );
 }
 
-/** Compact logo for the sidebar (mark + stacked wordmark + portal name). */
+/** Compact logo for the sidebar — the official CDC Türkiye logo + portal name.
+ *  The PNG lives in /public and is always present, so no fallback is needed. */
 export function TopLogo({ compact = false }: { compact?: boolean }) {
   return (
-    <span className="flex items-center gap-2.5">
-      <TopMark size={38} />
-      {!compact && (
-        <span className="leading-tight">
-          <span className="block text-[15px] font-extrabold tracking-tight">
-            <span style={{ color: C.navy }} className="dark:!text-[#cfe0f7]">CDC</span>{" "}
-            <span style={{ color: C.blue }}>Türkiye</span>
-          </span>
-          <span className="block text-[11px] font-medium text-ink3">TOP Portal</span>
-        </span>
-      )}
+    <span className="flex flex-col gap-1">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/cdc-turkiye-logo.png"
+        alt="CDC Türkiye"
+        className="h-10 w-auto rounded-md dark:bg-white dark:p-1"
+      />
+      {!compact && <span className="pl-0.5 text-[10px] font-bold uppercase tracking-wide text-ink3">TOP Portal</span>}
     </span>
   );
 }
