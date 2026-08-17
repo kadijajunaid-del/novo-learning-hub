@@ -70,7 +70,7 @@ export default function NotifyMe({
           className="inline-flex w-full items-center justify-center gap-2.5 rounded-2xl bg-primary px-8 py-4 text-base font-bold text-white shadow-lg shadow-primary/25 transition hover:bg-primary-strong hover:shadow-primary/35 disabled:opacity-50 sm:w-auto"
         >
           {busy ? <Loader2 size={20} className="animate-spin" /> : <BellRing size={20} />}
-          {full ? "Session fully booked" : "Notify Me"}
+          {full ? "Fully booked" : "Register"}
         </button>
       )}
       {!result && !full && (

@@ -145,7 +145,7 @@ export default function MonthCalendar({ events }: { events: CalEvent[] }) {
               href={`/events/${selected.id}`}
               className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-strong"
             >
-              Full details, registration & Notify Me <ArrowRight size={15} />
+              Full details & registration <ArrowRight size={15} />
             </Link>
           </div>
         </div>

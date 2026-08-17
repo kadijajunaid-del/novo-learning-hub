@@ -251,7 +251,7 @@ function TraineeDashboard({ db, user }: { db: DB; user: User }) {
       <div>
         <SectionHeader
           title="Your trainings"
-          sub="Trainings assigned to you — press Notify Me on any to register"
+          sub="Trainings assigned to you — open any and press Register"
         />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {assigned.map((e) => (
