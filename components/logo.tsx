@@ -53,12 +53,14 @@ export function CdcLogo({ height = 56 }: { height?: number }) {
  *  The PNG lives in /public and is always present, so no fallback is needed. */
 export function TopLogo({ compact = false }: { compact?: boolean }) {
   return (
-    <span className="flex flex-col gap-1">
+    <span className="flex flex-col items-start gap-1">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/cdc-turkiye-logo.png"
         alt="CDC Türkiye"
-        className="h-10 w-auto rounded-md dark:bg-white dark:p-1"
+        width={207}
+        height={144}
+        className="block h-10 w-auto max-w-none rounded-md object-contain dark:bg-white dark:p-1"
       />
       {!compact && <span className="pl-0.5 text-[10px] font-bold uppercase tracking-wide text-ink3">TOP Portal</span>}
     </span>
