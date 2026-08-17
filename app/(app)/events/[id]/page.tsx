@@ -138,21 +138,29 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                           </div>
                         )}
                       </div>
-                      <div className="flex items-center gap-2">
-                        {s.meetingLink && (registered || canManage || isAssignedTrainer) && (
-                          <a
-                            href={s.meetingLink}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-strong"
-                          >
-                            <Video size={13} /> Join
-                          </a>
-                        )}
-                        {(registered || canManage || isAssignedTrainer) && event.status === "published" && (
-                          <SessionIcs eventId={event.id} sessionId={s.id} />
-                        )}
-                      </div>
+                      {(() => {
+                        // The session's own trainer can join and download the
+                        // invite for the session they deliver.
+                        const isMySession = user.role === "trainer" && s.trainerId === user.id;
+                        const canUseSession = registered || canManage || isAssignedTrainer || isMySession;
+                        return (
+                          <div className="flex items-center gap-2">
+                            {s.meetingLink && canUseSession && (
+                              <a
+                                href={s.meetingLink}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-strong"
+                              >
+                                <Video size={13} /> Join
+                              </a>
+                            )}
+                            {canUseSession && event.status === "published" && (
+                              <SessionIcs eventId={event.id} sessionId={s.id} />
+                            )}
+                          </div>
+                        );
+                      })()}
                     </li>
                   );
                 })}
