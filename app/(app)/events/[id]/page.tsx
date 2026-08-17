@@ -156,7 +156,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                               </a>
                             )}
                             {canUseSession && event.status === "published" && (
-                              <SessionIcs eventId={event.id} sessionId={s.id} />
+                              <SessionIcs eventId={event.id} sessionId={s.id} userId={user.id} />
                             )}
                           </div>
                         );

@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { CalendarPlus, Check } from "lucide-react";
 
-/** Per-session Outlook (.ics) download button. Shows a green tick once the
- *  invitation has been downloaded on this device. */
-export default function SessionIcs({ eventId, sessionId }: { eventId: string; sessionId: string }) {
-  const key = `nn-ics-${eventId}-${sessionId}`;
+/** Per-session Outlook (.ics) download button. Shows a green tick once THIS
+ *  user has downloaded the invitation on this device (keyed per user so one
+ *  person's download doesn't tick another's button on a shared computer). */
+export default function SessionIcs({ eventId, sessionId, userId }: { eventId: string; sessionId: string; userId: string }) {
+  const key = `nn-ics-${userId}-${eventId}-${sessionId}`;
   const [downloaded, setDownloaded] = useState(false);
 
   useEffect(() => {
