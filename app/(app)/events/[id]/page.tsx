@@ -284,8 +284,12 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                           <Avatar name={tu.name} size={38} />
                           <div className="min-w-0 flex-1">
                             <div className="truncate text-sm font-bold text-ink">{tu.name}</div>
-                            <div className="truncate text-xs text-ink3">{tu.title} · {tu.department}</div>
-                            <a href={`mailto:${tu.email}`} className="block truncate text-xs font-medium text-primary hover:underline">{tu.email}</a>
+                            {/* Sessions this trainer delivers in THIS programme (the topics). */}
+                            <div className="text-xs leading-relaxed text-ink2">
+                              <span className="text-ink3">Delivering: </span>
+                              {mySessions.map((s) => s.name).join(", ")}
+                            </div>
+                            <a href={`mailto:${tu.email}`} className="mt-0.5 block truncate text-xs font-medium text-primary hover:underline">{tu.email}</a>
                             <div className="mt-1 flex flex-wrap items-center gap-1.5">
                               <span className="rounded-full bg-surface2 px-2 py-0.5 text-[10px] font-semibold text-ink2">{mySessions.length} session{mySessions.length === 1 ? "" : "s"}</span>
                               {(user.role === "admin" || (user.role === "trainer" && event.trainerId === user.id)) && (
