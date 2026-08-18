@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     ? body.assignedTrainerIds.filter((tid: string) => trainerIds.has(tid))
     : [];
 
-  const sessions = normalizeSessions(body.sessions, title, status === "published", trainerId, allowedSessionTrainers, body.category || db.settings.categories[0]);
+  const sessions = normalizeSessions(body.sessions, title, status === "published", trainerId, allowedSessionTrainers, body.category || db.settings.categories[0], trainerIds);
   // Sessions are required unless assigned trainers will add them.
   if (!sessions && !(allowTrainerSessions && assignedTrainerIds.length)) {
     return NextResponse.json({ error: "Add at least one session with a date, start and end time — or enable trainer sessions and assign trainers." }, { status: 400 });

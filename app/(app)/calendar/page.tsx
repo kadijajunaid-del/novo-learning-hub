@@ -1,6 +1,6 @@
 import { getDb } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
-import { eventSessions, visibleToTrainee, trainerCanSee, teamLeaderTrainees } from "@/lib/queries";
+import { eventSessions, visibleToTrainee, trainerCanSee, teamLeaderTrainees, sessionTrainerIds } from "@/lib/queries";
 import MonthCalendar, { type CalEvent } from "@/components/month-calendar";
 
 export const dynamic = "force-dynamic";
@@ -24,9 +24,9 @@ export default async function CalendarPage() {
   // One calendar entry per session, labelled "Sn/N" for multi-session programmes.
   const payload: CalEvent[] = events.flatMap((e) => {
     let sessions = eventSessions(e);
-    // Trainers see only the sessions assigned to them.
+    // Trainers see only the sessions they deliver (lead or co).
     if (user.role === "trainer") {
-      sessions = sessions.filter((s) => s.trainerId === user.id);
+      sessions = sessions.filter((s) => sessionTrainerIds(s).includes(user.id));
     }
     const total = eventSessions(e).length;
     return sessions.map((s) => {

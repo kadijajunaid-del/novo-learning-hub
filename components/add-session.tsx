@@ -31,6 +31,7 @@ export default function AddSession({
   const [f, setF] = useState({
     name: "",
     trainerId: trainers?.[0]?.id ?? "",
+    coTrainerIds: [] as string[],
     category: defaultCategory || categories[0] || "Onboarding",
     date: "",
     startTime: "09:00",
@@ -40,6 +41,7 @@ export default function AddSession({
     meetingLink: "",
   });
   const set = (k: string) => (e: React.ChangeEvent<any>) => setF((p) => ({ ...p, [k]: e.target.value }));
+  const toggleCo = (id: string) => setF((p) => ({ ...p, coTrainerIds: p.coTrainerIds.includes(id) ? p.coTrainerIds.filter((x) => x !== id) : [...p.coTrainerIds, id] }));
   const online = f.platform !== "Physical Meeting";
 
   const submit = async () => {
@@ -98,6 +100,28 @@ export default function AddSession({
                   </select>
                 </div>
               ) : null}
+              {trainers && trainers.length > 1 && (
+                <div>
+                  <label className={labelCls}>Co-trainers <span className="font-normal text-ink3">(optional)</span></label>
+                  <div className="flex flex-wrap gap-2">
+                    {trainers.filter((t) => t.id !== f.trainerId).map((t) => {
+                      const on = f.coTrainerIds.includes(t.id);
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => toggleCo(t.id)}
+                          className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                            on ? "border-primary bg-primary text-white" : "border-line text-ink2 hover:bg-surface2"
+                          }`}
+                        >
+                          {on ? "✓ " : ""}{t.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
               <div className="grid gap-3 sm:grid-cols-4">
                 <div>
                   <label className={labelCls}>Date *</label>

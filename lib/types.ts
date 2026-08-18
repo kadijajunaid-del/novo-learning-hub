@@ -28,7 +28,8 @@ export type Platform =
 export interface EventSession {
   id: string;
   name: string; // editable label, e.g. "Kick-off" (defaults to "Session n")
-  trainerId: string; // each session can have its own trainer
+  trainerId: string; // the lead trainer for the session
+  coTrainerIds?: string[]; // optional additional trainers co-delivering it
   category: string; // each session can have its own training category
   date: string; // YYYY-MM-DD
   startTime: string; // HH:mm

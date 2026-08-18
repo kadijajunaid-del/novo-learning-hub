@@ -72,11 +72,16 @@ export function teamLeaderTrainees(db: DB, leaderId: string): User[] {
   return db.users.filter((u) => u.role === "trainee" && u.batch && batches.has(u.batch));
 }
 
-/** A trainer sees events they own, deliver a session of, or are assigned to. */
+/** All trainers on a session: the lead plus any co-trainers, de-duplicated. */
+export function sessionTrainerIds(s: EventSession): string[] {
+  return [...new Set([s.trainerId, ...(s.coTrainerIds ?? [])].filter(Boolean))];
+}
+
+/** A trainer sees events they own, deliver a session of (lead or co), or are assigned to. */
 export function trainerCanSee(e: TrainingEvent, trainerId: string): boolean {
   return (
     e.trainerId === trainerId ||
-    (e.sessions ?? []).some((s) => s.trainerId === trainerId) ||
+    (e.sessions ?? []).some((s) => sessionTrainerIds(s).includes(trainerId)) ||
     (e.assignedTrainerIds ?? []).includes(trainerId)
   );
 }

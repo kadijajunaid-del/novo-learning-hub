@@ -11,7 +11,7 @@ import NotifyMe from "@/components/notify-me";
 import EventActions from "@/components/event-actions";
 import AttendancePanel from "@/components/attendance-panel";
 import FeedbackForm from "@/components/feedback-form";
-import { regsFor, eventRating, eventSessions, visibleToTrainee } from "@/lib/queries";
+import { regsFor, eventRating, eventSessions, visibleToTrainee, sessionTrainerIds } from "@/lib/queries";
 import SessionIcs from "@/components/session-ics";
 import SessionStatus from "@/components/session-status";
 import AddSession from "@/components/add-session";
@@ -45,9 +45,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
     const u = db.users.find((x) => x.id === r.userId);
     return { userId: r.userId, name: u?.name ?? "Unknown", department: u?.department ?? "", attended: r.attended };
   });
-  // Trainers see only the sessions assigned to them; everyone else sees all.
+  // Trainers see only the sessions they deliver (lead or co); everyone else sees all.
   const allSessions = eventSessions(event);
-  const sessions = user.role === "trainer" ? allSessions.filter((s) => s.trainerId === user.id) : allSessions;
+  const sessions = user.role === "trainer" ? allSessions.filter((s) => sessionTrainerIds(s).includes(user.id)) : allSessions;
   const today = todayISO();
 
   return (
@@ -119,7 +119,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                             {s.platform === "Physical Meeting" ? s.venue : s.platform}
                           </span>
                           <span className="inline-flex items-center gap-1.5 font-medium text-ink3">
-                            <UserRound size={12} /> {db.users.find((u) => u.id === s.trainerId)?.name ?? trainer?.name ?? "—"}
+                            <UserRound size={12} /> {sessionTrainerIds(s).map((tid) => db.users.find((u) => u.id === tid)?.name).filter(Boolean).join(", ") || trainer?.name || "—"}
                           </span>
                           {s.category && (
                             <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-semibold text-primary-strong dark:text-primary">
@@ -130,7 +130,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                         {/* delivery status */}
                         {event.status !== "cancelled" && (user.role === "trainer" || canManage) && (
                           <div className="mt-2">
-                            {user.role === "trainer" && s.trainerId === user.id ? (
+                            {user.role === "trainer" && sessionTrainerIds(s).includes(user.id) ? (
                               <SessionStatus eventId={event.id} sessionId={s.id} accepted={!!s.accepted} completed={!!s.completed} mode="trainer" />
                             ) : (
                               <SessionStatus eventId={event.id} sessionId={s.id} accepted={!!s.accepted} completed={!!s.completed} mode="view" />
@@ -141,7 +141,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                       {(() => {
                         // The session's own trainer can join and download the
                         // invite for the session they deliver.
-                        const isMySession = user.role === "trainer" && s.trainerId === user.id;
+                        const isMySession = user.role === "trainer" && sessionTrainerIds(s).includes(user.id);
                         const canUseSession = registered || canManage || isAssignedTrainer || isMySession;
                         return (
                           <div className="flex items-center gap-2">
@@ -271,7 +271,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
             {(() => {
               // Distinct trainers across all sessions, each with their session
               // count and combined delivery status.
-              const ids = [...new Set(allSessions.map((s) => s.trainerId).filter(Boolean))];
+              const ids = [...new Set(allSessions.flatMap((s) => sessionTrainerIds(s)))];
               if (!ids.length) return null;
               return (
                 <Card className="p-5">
@@ -282,7 +282,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                     {ids.map((tid) => {
                       const tu = db.users.find((u) => u.id === tid);
                       if (!tu) return null;
-                      const mySessions = allSessions.filter((s) => s.trainerId === tid);
+                      const mySessions = allSessions.filter((s) => sessionTrainerIds(s).includes(tid));
                       const done = mySessions.filter((s) => s.completed).length;
                       const accepted = mySessions.filter((s) => s.accepted).length;
                       const statusTxt = done === mySessions.length ? "All delivered" : accepted ? `${accepted}/${mySessions.length} accepted` : "Not yet accepted";

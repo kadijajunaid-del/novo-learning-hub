@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getDb, saveDb, audit } from "@/lib/db";
 import { getSessionUser } from "@/lib/auth";
 import { normalizeSessions } from "@/lib/sessions";
-import { syncEventFromSessions } from "@/lib/queries";
+import { syncEventFromSessions, sessionTrainerIds } from "@/lib/queries";
 import { uid } from "@/lib/format";
 
 // Who may add sessions to this event.
@@ -29,8 +29,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!session) return NextResponse.json({ error: "Session not found." }, { status: 404 });
 
   const isOwnerOrAdmin = user.role === "admin" || event.trainerId === user.id;
-  if (!isOwnerOrAdmin && session.trainerId !== user.id) {
-    return NextResponse.json({ error: "You can only update your own session." }, { status: 403 });
+  // Any assigned trainer (lead or co) can accept/complete the session.
+  if (!isOwnerOrAdmin && !sessionTrainerIds(session).includes(user.id)) {
+    return NextResponse.json({ error: "You can only update a session you deliver." }, { status: 403 });
   }
 
   if (action === "accept") session.accepted = true;
@@ -71,6 +72,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     forcedTrainer ?? event.trainerId,
     user.role === "admin" ? trainerIds : new Set([user.id]),
     event.category || db.settings.categories[0],
+    trainerIds,
   );
   if (!one) return NextResponse.json({ error: "A session needs a date, start and end time." }, { status: 400 });
 

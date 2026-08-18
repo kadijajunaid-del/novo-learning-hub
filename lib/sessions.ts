@@ -14,8 +14,11 @@ export function normalizeSessions(
   defaultTrainerId: string,
   allowedTrainerIds: Set<string>,
   defaultCategory = "Onboarding",
+  allTrainerIds?: Set<string>,
 ): EventSession[] | null {
   if (!Array.isArray(raw) || !raw.length) return null;
+  // Co-trainers may be any valid trainer (occasional co-delivery).
+  const coPool = allTrainerIds ?? allowedTrainerIds;
   const sessions: EventSession[] = [];
   let i = 0;
   for (const s of raw) {
@@ -27,10 +30,14 @@ export function normalizeSessions(
     if (physical) meetingLink = "";
     else if (published && !meetingLink) meetingLink = generateMeetingLink(platform, title);
     const trainerId = s.trainerId && allowedTrainerIds.has(s.trainerId) ? s.trainerId : defaultTrainerId;
+    const coTrainerIds: string[] = Array.isArray(s.coTrainerIds)
+      ? [...new Set<string>((s.coTrainerIds as string[]).filter((id) => coPool.has(id) && id !== trainerId))]
+      : [];
     sessions.push({
       id: s.id && String(s.id).startsWith("ss_") ? s.id : uid("ss"),
       name: String(s.name ?? "").trim() || `Session ${i}`,
       trainerId,
+      coTrainerIds,
       category: String(s.category ?? "").trim() || defaultCategory,
       date: s.date,
       startTime: s.startTime,

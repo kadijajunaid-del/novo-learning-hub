@@ -15,6 +15,7 @@ type SessionDraft = {
   id?: string;
   name: string;
   trainerId: string;
+  coTrainerIds: string[];
   category: string;
   date: string;
   startTime: string;
@@ -76,6 +77,7 @@ export default function EventForm({
   const emptySession = (): SessionDraft => ({
     name: "",
     trainerId: trainers?.[0]?.id ?? "",
+    coTrainerIds: [],
     category: categories[0] ?? "Onboarding",
     date: "",
     startTime: "09:00",
@@ -86,8 +88,8 @@ export default function EventForm({
   const [sessions, setSessions] = useState<SessionDraft[]>(
     existing
       ? (existing.sessions?.length
-          ? existing.sessions.map((s) => ({ name: "", trainerId: existing.trainerId, category: existing.category, ...s }))
-          : [{ name: "", trainerId: existing.trainerId, category: existing.category, date: existing.date, startTime: existing.startTime, endTime: existing.endTime, platform: existing.platform, venue: existing.venue === "Online" ? "" : existing.venue, meetingLink: existing.meetingLink }])
+          ? existing.sessions.map((s) => ({ name: "", trainerId: existing.trainerId, category: existing.category, coTrainerIds: [], ...s }))
+          : [{ name: "", trainerId: existing.trainerId, coTrainerIds: [], category: existing.category, date: existing.date, startTime: existing.startTime, endTime: existing.endTime, platform: existing.platform, venue: existing.venue === "Online" ? "" : existing.venue, meetingLink: existing.meetingLink }])
       : [emptySession()],
   );
   const [materials, setMaterials] = useState<{ name: string; size: string }[]>(existing?.materials ?? []);
@@ -95,6 +97,8 @@ export default function EventForm({
   const set = (k: string) => (e: React.ChangeEvent<any>) => setF((p) => ({ ...p, [k]: e.target.value }));
   const setSession = (i: number, k: keyof SessionDraft) => (e: React.ChangeEvent<any>) =>
     setSessions((prev) => prev.map((s, n) => (n === i ? { ...s, [k]: e.target.value } : s)));
+  const toggleCoTrainer = (i: number, id: string) =>
+    setSessions((prev) => prev.map((s, n) => (n === i ? { ...s, coTrainerIds: s.coTrainerIds.includes(id) ? s.coTrainerIds.filter((x) => x !== id) : [...s.coTrainerIds, id] } : s)));
 
   const addSession = () =>
     setSessions((prev) => {
@@ -264,6 +268,28 @@ export default function EventForm({
                       </select>
                     </div>
                   </div>
+                  {trainers && trainers.length > 1 && (
+                    <div className="mb-3">
+                      <label className={labelCls}>Co-trainers <span className="font-normal text-ink3">(optional — anyone can mark the session completed)</span></label>
+                      <div className="flex flex-wrap gap-2">
+                        {trainers.filter((t) => t.id !== s.trainerId).map((t) => {
+                          const on = s.coTrainerIds.includes(t.id);
+                          return (
+                            <button
+                              key={t.id}
+                              type="button"
+                              onClick={() => toggleCoTrainer(i, t.id)}
+                              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                                on ? "border-primary bg-primary text-white" : "border-line text-ink2 hover:bg-surface2"
+                              }`}
+                            >
+                              {on ? "✓ " : ""}{t.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                   <div className="grid gap-3 sm:grid-cols-4">
                     <div>
                       <label className={labelCls}>Date *</label>
