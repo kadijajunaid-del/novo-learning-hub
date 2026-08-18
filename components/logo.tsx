@@ -58,11 +58,11 @@ export function TopLogo({ compact = false }: { compact?: boolean }) {
       <img
         src="/cdc-turkiye-logo.png"
         alt="CDC Türkiye"
-        width={207}
-        height={144}
-        className="block h-10 w-auto max-w-none rounded-md object-contain dark:bg-white dark:p-1"
+        width={739}
+        height={437}
+        className="block h-16 w-auto max-w-none rounded-md object-contain dark:bg-white dark:p-1"
       />
-      {!compact && <span className="pl-0.5 text-[10px] font-bold uppercase tracking-wide text-ink3">TOP Portal</span>}
+      {!compact && <span className="pl-0.5 text-[11px] font-bold uppercase tracking-wide text-ink3">TOP Portal</span>}
     </span>
   );
 }
