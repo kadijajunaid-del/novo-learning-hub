@@ -9,6 +9,8 @@ export const dynamic = "force-dynamic";
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getSessionUser();
   if (!user) redirect("/login");
+  // Force a password change on first login (or after an admin reset).
+  if (user.mustChangePassword) redirect("/account");
   const db = await getDb();
   return (
     <Shell

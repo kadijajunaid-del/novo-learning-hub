@@ -24,6 +24,7 @@ export async function POST(req: Request) {
     name: String(name).trim(),
     email: String(email).trim().toLowerCase(),
     password: password || "Trainer@123",
+    mustChangePassword: true,
     role: "trainer",
     department: department || db.settings.departments[0],
     title: title || "Trainer",

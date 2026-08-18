@@ -10,6 +10,8 @@ export interface User {
   title: string;
   /** Trainee batch (from Settings → Trainee batches). Empty for trainers/admins. */
   batch?: string;
+  /** Set when the account has a temporary password and must be changed at next login. */
+  mustChangePassword?: boolean;
   active: boolean;
   joined: string;
 }

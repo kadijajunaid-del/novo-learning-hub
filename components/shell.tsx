@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   LayoutDashboard, CalendarDays, GraduationCap, Users, BarChart3, Bell, Settings,
-  Sun, Moon, LogOut, Menu, X, BookOpen, UserCog, Layers,
+  Sun, Moon, LogOut, Menu, X, BookOpen, UserCog, Layers, KeyRound,
 } from "lucide-react";
 import { Avatar } from "./ui";
 import { TopLogo } from "./logo";
@@ -132,6 +132,9 @@ export default function Shell({
               <LogOut size={17} />
             </button>
           </div>
+          <Link href="/account" className="mt-2 flex items-center gap-2 rounded-lg px-1 py-1 text-xs font-medium text-ink3 transition hover:text-primary">
+            <KeyRound size={13} /> Change password
+          </Link>
         </div>
       </aside>
 
@@ -145,7 +148,10 @@ export default function Shell({
               <button aria-label="Close menu" onClick={() => setOpen(false)}><X size={20} className="text-ink2" /></button>
             </div>
             {links}
-            <div className="mt-auto border-t border-line p-4">
+            <div className="mt-auto border-t border-line p-4 space-y-2">
+              <Link href="/account" onClick={() => setOpen(false)} className="flex items-center gap-2 text-sm font-medium text-ink2">
+                <KeyRound size={16} /> Change password
+              </Link>
               <button onClick={logout} className="flex items-center gap-2 text-sm font-medium text-crit">
                 <LogOut size={16} /> Sign out
               </button>

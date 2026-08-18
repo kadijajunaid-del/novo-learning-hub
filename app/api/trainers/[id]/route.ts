@@ -18,6 +18,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     audit(db, admin.name, trainer.active ? "trainer.enabled" : "trainer.disabled", trainer.name);
   } else if (body.action === "resetPassword") {
     trainer.password = body.password || "Trainer@123";
+    trainer.mustChangePassword = true;
     audit(db, admin.name, "trainer.password_reset", trainer.name);
   } else {
     for (const k of ["name", "email", "department", "title"]) {

@@ -20,6 +20,7 @@ export async function POST(req: Request) {
     name: String(name).trim(),
     email: String(email).trim().toLowerCase(),
     password: password || "Leader@123",
+    mustChangePassword: true,
     role: "team_leader",
     department: department || db.settings.departments[0],
     title: title || "Team Leader",
