@@ -41,6 +41,9 @@ export default function AddSession({
     meetingLink: "",
   });
   const set = (k: string) => (e: React.ChangeEvent<any>) => setF((p) => ({ ...p, [k]: e.target.value }));
+  // Changing the primary trainer must never leave that person also listed as a co-trainer.
+  const setTrainer = (e: React.ChangeEvent<HTMLSelectElement>) =>
+    setF((p) => ({ ...p, trainerId: e.target.value, coTrainerIds: p.coTrainerIds.filter((x) => x !== e.target.value) }));
   const toggleCo = (id: string) => setF((p) => ({ ...p, coTrainerIds: p.coTrainerIds.includes(id) ? p.coTrainerIds.filter((x) => x !== id) : [...p.coTrainerIds, id] }));
   const online = f.platform !== "Physical Meeting";
 
@@ -95,7 +98,7 @@ export default function AddSession({
               {trainers?.length ? (
                 <div>
                   <label className={labelCls}>Session trainer</label>
-                  <select className={inputCls} value={f.trainerId} onChange={set("trainerId")}>
+                  <select className={inputCls} value={f.trainerId} onChange={setTrainer}>
                     {trainers.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                   </select>
                 </div>

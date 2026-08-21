@@ -97,6 +97,10 @@ export default function EventForm({
   const set = (k: string) => (e: React.ChangeEvent<any>) => setF((p) => ({ ...p, [k]: e.target.value }));
   const setSession = (i: number, k: keyof SessionDraft) => (e: React.ChangeEvent<any>) =>
     setSessions((prev) => prev.map((s, n) => (n === i ? { ...s, [k]: e.target.value } : s)));
+  // Changing the primary trainer must never leave that person also listed as a co-trainer.
+  const setSessionTrainer = (i: number) => (e: React.ChangeEvent<HTMLSelectElement>) =>
+    setSessions((prev) =>
+      prev.map((s, n) => (n === i ? { ...s, trainerId: e.target.value, coTrainerIds: s.coTrainerIds.filter((x) => x !== e.target.value) } : s)));
   const toggleCoTrainer = (i: number, id: string) =>
     setSessions((prev) => prev.map((s, n) => (n === i ? { ...s, coTrainerIds: s.coTrainerIds.includes(id) ? s.coTrainerIds.filter((x) => x !== id) : [...s.coTrainerIds, id] } : s)));
 
@@ -254,7 +258,7 @@ export default function EventForm({
                     <div>
                       <label className={labelCls}>Trainer</label>
                       {trainers?.length ? (
-                        <select className={inputCls} value={s.trainerId} onChange={setSession(i, "trainerId")}>
+                        <select className={inputCls} value={s.trainerId} onChange={setSessionTrainer(i)}>
                           {trainers.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                         </select>
                       ) : (
